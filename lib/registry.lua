@@ -1,3 +1,7 @@
+--- Registry getter & editor
+-- @moudle[kind=core] Registry
+-- @author Marcus Wenzel
+
 local file = require(".lib.file")
 
 local registry = {}
@@ -116,8 +120,9 @@ function registry.writeKey(from, key, data)
 end
 
 --- Upgrades an old registry to a new one.
--- @param from table The registry to read from
--- @param to table The registry to write to
+-- @tparam table from The registry to read from
+-- @tparam table to The registry to write to
+-- @return The table that was created
 function registry.update(old, new)
   local function readFolder(old, new)
     local value = {

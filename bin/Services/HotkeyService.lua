@@ -2,6 +2,7 @@ local wm = require(".lib.wm")
 local logger = wm.getSystemLogger()
 
 local debounce = false
+local w, h = term.getSize()
 
 local hotkeys = {
   {
@@ -11,6 +12,8 @@ local hotkeys = {
       wm.launch("/bin/run.lua", {
         w = 27,
         h = 7,
+        x = 2,
+        y = h - 8,
         title = "Run",
         isResizeable = false,
         hideMaximize = true,
@@ -33,6 +36,8 @@ while true do
   elseif e[1] == "key_up" then
     heldKeys[e[2]] = nil
     debounce = false
+  elseif e[1] == "term_resize" then
+    w, h = term.getSize()
   end
 
   if debounce == false then

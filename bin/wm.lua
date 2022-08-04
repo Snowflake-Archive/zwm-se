@@ -11,7 +11,7 @@ local native = term.current()
 local w, h = term.getSize()
 local buffer = window.create(term.current(), 1, 1, w, h)
 
-local log = logger:new(true)
+local log = logger:new(false)
 
 local processes = {}
 local displayOrder = {}
@@ -21,6 +21,7 @@ local heldKeys = {}
 local windowDraggingState
 local windowResizeState
 local backgroundLayers = {}
+local renderMenu = false
 
 local frameTime = 0
 
@@ -32,8 +33,6 @@ xpcall(function()
       for i, v in pairs(e) do
         se = se .. " " .. tostring(v)
       end
-
-      logger:info("Event redirect to %s", se)
     end
 
     coroutine.resume(process.coroutine, unpack(e))
@@ -44,38 +43,36 @@ xpcall(function()
   local function renderProcess(p, idx, diso)
     if p.isService ~= true and p.visible == true then
       if not p.hideFrame then
-        local color = p.focused and colors.cyan or colors.lightBlue
+        local color = p.focused and registry.readKey("machine", "Appearance.WindowFocused") or registry.readKey("machine", "Appearance.WindowUnfocused")
 
         paintutils.drawLine(p.x, p.y, p.x + p.w - 1, p.y, color)
-        term.setTextColor(colors.white)
+        term.setTextColor(registry.readKey("machine", "Appearance.TitlebarText"))
         term.setCursorPos(p.x, p.y)
         term.write(tostring (diso) .. "." .. tostring(idx) .. ">" .. p.title)
 
         term.setCursorPos(p.x + p.w - 3, p.y)
-        term.setBackgroundColor(colors.red)
-        term.setTextColor(colors.white)
+        term.setBackgroundColor(registry.readKey("machine", "Appearance.CloseButton"))
+        term.setTextColor(registry.readKey("machine", "Appearance.CloseButtonText"))
         term.write(" x ")
 
         local nextButtonRenderAt = p.x + p.w - 6
 
+        term.setBackgroundColor(registry.readKey("machine", "Appearance.ControlButton"))
+        term.setTextColor(registry.readKey("machine", "Appearance.ControlButtonText"))
+
         if p.hideMaximize == false then
           term.setCursorPos(nextButtonRenderAt, p.y)
-          term.setBackgroundColor(colors.lightBlue)
-          term.setTextColor(colors.white)
           term.write(" " .. (p.isMaxamized and "-" or "+") .. " ")
           nextButtonRenderAt = nextButtonRenderAt - 3
         end
 
         if p.hideMinimize == false then
           term.setCursorPos(nextButtonRenderAt, p.y)
-          term.setBackgroundColor(colors.lightBlue)
-          term.setTextColor(colors.white)
           term.write(" \31 ")
           nextButtonRenderAt = nextButtonRenderAt - 3
         end
 
         if p.x >= 2 then
-          logger:info("Drawing left border")
           for i = 1, p.h do
             if p.y + i - 1 <= h then
               local _, lineA, lineB = buffer.getLine(p.y + i - 1)
@@ -97,7 +94,6 @@ xpcall(function()
           end
 
          
-          logger:info("Drawing left-bottom corner %d %d", p.y + p.h, h)
           if p.y + p.h <= h then
             local _, _, line2 = buffer.getLine(p.y + p.h)
             util.drawPixelCharacter(p.x - 1, p.y + p.h, false, true, false, false, false, false, color, util.fromBlit(util.selectXfromBlit(p.x - 1, line2)))
@@ -105,7 +101,6 @@ xpcall(function()
         end
 
         if p.y + p.h <= h then
-          logger:info("Drawing bottom edge")
           local _, _, line2 = buffer.getLine(p.y + p.h)
           for i = 1, p.w do
             if p.x + i - 1 <= w and p.x + i - 1 >= 1 then
@@ -116,12 +111,10 @@ xpcall(function()
 
           
           if p.x + p.w <= w then
-            logger:info("Drawing bottom right edge")
             util.drawPixelCharacter(p.x + p.w, p.y + p.h, true, false, false, false, false, false, color, util.fromBlit(util.selectXfromBlit(p.x + p.w, line2)))
           end
         end
 
-        logger:info("Drawing right edge")
         if p.x + p.w <= w then
           for i = 1, p.h do
             if p.y + i - 1 <= h then
@@ -164,6 +157,24 @@ xpcall(function()
     processes[idx] = nil
     table.remove(displayOrder, diso)
     renderProcesses()
+  end
+
+  local function renderMenubar()
+    local oldX, oldY = term.getCursorPos()
+    logger:info("Render menubar")
+    buffer.setCursorPos(2, h)
+    term.setBackgroundColor(colors.gray)
+    buffer.clearLine()
+    buffer.write("+")
+
+    local time = os.time("ingame")
+    local timeString = textutils.formatTime(time, true)
+    term.setCursorPos(w - #timeString, h)
+    term.write(timeString)
+
+    util.drawPixelCharacter(w, h, false, true, false, true, false, true, colors.black, colors.gray)
+
+    term.setCursorPos(oldX, oldY)
   end
 
   -- TODO: make this gracefully end a process, sending an "end" event to it, so the program can wrap up what it's doing / ask user to save, etc.
@@ -396,9 +407,10 @@ xpcall(function()
         end
 
         if e[1] == "term_resize" then
-          local nw, nh = term.getSize()
-          w, h = nw, nh
+          local nW, nH = native.getSize()
+          w, h = nW, nH
           buffer.reposition(1, 1, w, h)
+          logger:info("Resized to %d x %d", w, h)
         elseif e[1] == "mouse_up" then
           if windowDraggingState then 
             windowDraggingState = nil
@@ -461,7 +473,6 @@ xpcall(function()
                 if e[3] >= v.x and e[3] <= v.x + v.w - 1 and e[4] >= v.y and e[4] <= v.y + v.h - 1 then
                   redirectEventsForMouse(v, e, o, i)
                   didHitMouse = true
-                  logger:info("Mouse hit done")
                 elseif e[2] == 2 and e[3] == v.x + v.w and e[4] == v.y + v.h and v.isResizeable == true and v.isMaxamized == false then
                   didHitMouse = true
                   windowResizeState = {
@@ -499,8 +510,6 @@ xpcall(function()
                   onCompleteDisplayOrder[1] = o
 
                   anyFocused = true
-
-                  logger:info("redirected to %d", o)
                 else
                   coroutine.resume(v.coroutine)
                 end
@@ -531,7 +540,7 @@ xpcall(function()
         local renderStart = os.epoch("utc")
         eventManager:check(e)
         backgroundLayers = {}
-        buffer.setBackgroundColor(colors.lightGray)
+        buffer.setBackgroundColor(registry.readKey("machine", "Appearance.BackgroundColor"))
         buffer.clear()
 
         local versionName = registry.readKey("machine", "SystemVersionName")
@@ -554,10 +563,10 @@ xpcall(function()
         end
 
         local w, h = buffer.getSize()
-        buffer.setCursorPos(w - #str1 + 1, h)
+        buffer.setCursorPos(w - #str1 + 1, h - 1)
         term.setTextColor(colors.white)
         term.write(str1)
-        buffer.setCursorPos(w - #str2 + 1, h - 1)
+        buffer.setCursorPos(w - #str2 + 1, h - 2)
         term.write(str2)
 
         displayOrder = onCompleteDisplayOrder
@@ -567,6 +576,8 @@ xpcall(function()
         if anyFocused == false then
           term.setCursorBlink(false)
         end
+
+        renderMenubar()
 
         frameTime = os.epoch("utc") - renderStart
       end

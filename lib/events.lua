@@ -1,7 +1,11 @@
+--- A basic event manager, allows for adding multiple listeners to an event.
+-- @moudle[kind=core] EventManager
+-- @author Marcus Wenzel
+
 local eventManager = {}
 
 --- Creates a new event manager.
--- @return table The event manager
+-- @return EventManager The event manager
 function eventManager:new()
   local o = {}
   setmetatable(o, self)
@@ -13,8 +17,8 @@ function eventManager:new()
 end
 
 --- Adds a listener to the event manager.
--- @param listener string|table The event to listen for. If this is a table, it is iterated through as a list of events. If this is a string, it is treated as a single event, with a required callback function.
--- @param callback function The callback to call when the event is fired
+-- @tparam string|table listener The event to listen for. If this is a table, it is iterated through as a list of events. If this is a string, it is treated as a single event, with a required callback function.
+-- @tparam function callback The callback to call when the event is fired
 function eventManager:addListener(listener, callback)
   local function add(l, c)
     if self.listeners[listener] then
@@ -33,6 +37,8 @@ function eventManager:addListener(listener, callback)
   end
 end
 
+--- Checks events.
+-- @tparam table e A packed os.pullEvent response.
 function eventManager:check(e)
   if self.listeners[e[1]] then
     for i, v in ipairs(self.listeners[e[1]]) do
@@ -42,7 +48,7 @@ function eventManager:check(e)
 end
 
 --- Starts listening for events.
--- @param[opt] useRaw boolean If this is true, os.pullEventRaw will be used rather than os.pullEvent
+-- @tparam[opt] boolean useRaw If this is true, os.pullEventRaw will be used rather than os.pullEvent
 function eventManager:listen(useRaw)
   while true do
     local e = {(useRaw and os.pullEventRaw or os.pullEvent)()}

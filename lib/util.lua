@@ -1,27 +1,20 @@
+--- Some utilities
+-- @moudle[kind=core] Utils
+-- @author Marcus Wenzel
+
 local utils = {}
 
-local blitTable = {
-  ["0"] = 1,
-  ["1"] = 2,
-  ["2"] = 4,
-  ["3"] = 8,
-  ["4"] = 16,
-  ["5"] = 32,
-  ["6"] = 64,
-  ["7"] = 128,
-  ["8"] = 256,
-  ["9"] = 512,
-  ["a"] = 1024,
-  ["b"] = 2048,
-  ["c"] = 4096,
-  ["d"] = 8192,
-  ["e"] = 16384,
-  ["f"] = 32768
-}
-
 --- Draws a drawing char.
--- @param x number The x position.
--- @param y number The y position.
+-- @tparam number x The x position.
+-- @tparam number y The y position.
+-- @tparam boolean tl Draw top left cell.
+-- @tparam boolean tr Draw top right cell.
+-- @tparam boolean l Draw middle left cell.
+-- @tparam boolean r Draw middle left cell.
+-- @tparam boolean bl Draw bottom left cell.
+-- @tparam boolean br Draw bottom right cell.
+-- @tparam number tc Foreground color
+-- @tparam number bc Background color
 -- @author thonkinator#8473
 function utils.drawPixelCharacter(x, y, tl, tr, l, r, bl, br, tc, bc)
   term.setCursorPos(x,y)
@@ -51,10 +44,17 @@ function utils.drawPixelCharacter(x, y, tl, tr, l, r, bl, br, tc, bc)
   term.setTextColor(tc)
 end
 
+--- Converts a blit to a color number
+-- @tparam string blit The blit char to convert
+-- @return number The color
 function utils.fromBlit(blit)
   return 2 ^ tonumber(blit, 16)
 end
 
+--- Converts a blit to a color number
+-- @tparam number x The X position to pull
+-- @tparam string blit The blit string to pull from
+-- @return number The color
 function utils.selectXfromBlit(x, blit)
   return blit:sub(x, x)
 end
