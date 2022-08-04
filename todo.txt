@@ -1,0 +1,8 @@
+[X] Registry management
+[X] Event manager
+[ ] UI things
+    [ ] "List" layouts
+    [ ] Menubars
+    [ ] Buttons
+    [ ] Inputs
+[ ] Window manager

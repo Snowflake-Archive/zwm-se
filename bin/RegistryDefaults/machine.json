@@ -1,0 +1,52 @@
+{
+  "folders": {
+    "Name": {
+      "folders": {},
+      "values": {
+        "StringTest": {
+          "type": "string",
+          "value": "cool string"
+        },
+        "NumberTest": {
+          "type": "number",
+          "value": "123"
+        },
+        "BooleanTest": {
+          "type": "boolean",
+          "value": "true"
+        },
+        "TableTest1": {
+          "type": "table",
+          "value": "{\"key\": \"value\"}"
+        },
+        "TableTest2": {
+          "type": "table",
+          "value": "[\"one\", \"two\", \"three\"]"
+        },
+        "EnumTest": {
+          "type": "enum",
+          "enumValues": [
+            "one",
+            "two",
+            "three",
+            "four",
+            "five",
+            "six",
+            "seven",
+            "eight",
+            "nine",
+            "ten"
+          ],
+          "value": "one"
+        }
+      }
+    }
+  },
+  "values": {
+    "Version": {
+      "type": "number",
+      "value": "1",
+      "overrideOnUpdate": true
+    }
+  }
+}
