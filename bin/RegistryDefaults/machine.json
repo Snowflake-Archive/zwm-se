@@ -1,49 +1,17 @@
 {
-  "folders": {
-    "Name": {
-      "folders": {},
-      "values": {
-        "StringTest": {
-          "type": "string",
-          "value": "cool string"
-        },
-        "NumberTest": {
-          "type": "number",
-          "value": "123"
-        },
-        "BooleanTest": {
-          "type": "boolean",
-          "value": "true"
-        },
-        "TableTest1": {
-          "type": "table",
-          "value": "{\"key\": \"value\"}"
-        },
-        "TableTest2": {
-          "type": "table",
-          "value": "[\"one\", \"two\", \"three\"]"
-        },
-        "EnumTest": {
-          "type": "enum",
-          "enumValues": [
-            "one",
-            "two",
-            "three",
-            "four",
-            "five",
-            "six",
-            "seven",
-            "eight",
-            "nine",
-            "ten"
-          ],
-          "value": "one"
-        }
-      }
-    }
-  },
+  "folders": {},
   "values": {
-    "Version": {
+    "RegistryVersion": {
+      "type": "number",
+      "value": "1",
+      "overrideOnUpdate": true
+    },
+    "SystemVersionName": {
+      "type": "string",
+      "value": "Alpha Testing - 8/4/2022",
+      "overrideOnUpdate": true
+    },
+    "SystemVersionNumber": {
       "type": "number",
       "value": "1",
       "overrideOnUpdate": true

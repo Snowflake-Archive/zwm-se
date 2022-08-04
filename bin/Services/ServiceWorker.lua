@@ -10,7 +10,7 @@ local logger = wm.getSystemLogger()
 logger:info("[ServiceWorker] Service worker started")
 
 for i, v in pairs(services) do
-  logger:debug("[ServiceWorker] Starting service: " .. v)
+  logger:info("[ServiceWorker] Starting service: " .. v)
   wm.launch(v, {isService = true})
   logger:info("[ServiceWorker] Started service %d of %d: %s", i, #services, v)
 end

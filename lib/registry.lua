@@ -1,13 +1,14 @@
-local file = require("lib.file")
+local file = require(".lib.file")
 
 local registry = {}
 
 --- Reads a full registry file.
 -- @param from string The registry to read from (machine or user)
+-- @param isRaw boolean Whether the path is raw or not
 -- @return table The registry table
-function registry.read(from)
+function registry.read(from, isRaw)
   local path = "/bin/Registry/" .. from .. ".json"
-  local data = file.readJSON(path)
+  local data = file.readJSON(isRaw and from or path)
   
   return data
 end
@@ -15,9 +16,10 @@ end
 --- Reads a key from a registry file.
 -- @param from string The registry to read from (machine or user)
 -- @param key string The key to read. This is in compressed table format (e.g. One.Two.Three)
+-- @param isRaw boolean Whether the path is raw or not
 -- @return string The value of the key
-function registry.readKey(from, key)
-  local data = registry.read(from)
+function registry.readKey(from, key, isRaw)
+  local data = registry.read(from, isRaw)
   local children = data
   
   for t in key:gmatch("[^%.]+") do
@@ -127,6 +129,8 @@ function registry.update(old, new)
       if old[i] == nil or v.overrideOnUpdate == true then
         value.values[i] = {}
         value.values[i].value = v.value
+        value.values[i].type = v.type
+        value.values[i].enumValues = v.enumValues
       end
     end
 

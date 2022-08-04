@@ -7,7 +7,7 @@ local lookup = {
   info = "INFO",
   warning = "WARN",
   error = "ERRO",
-  critical = "CRIT"
+  critical = "CRITICAL"
 }
 
 --- Creates a new logger.
@@ -20,7 +20,7 @@ function logger:new(debug)
 
   self.lines = {}
   self.linesText = ""
-  self.debug = debug == true
+  self.isDebug = debug == true
 
   local handle = fs.open("log.log", "w")
   handle.write("")
@@ -36,7 +36,7 @@ end
 -- @param message string The message to log
 -- @param ... any Extra arguments to pass to string.format
 function logger:log(type, message, ...)
-  if self.debug == false and type == "debug" then return end
+  if self.isDebug == false and type == "debug" then return end
   local fmsg = message
 
   if ({...})[1] then
@@ -96,7 +96,7 @@ end
 --- Dumps logs.
 -- @param file string The file to dump to
 function logger:dump(file)
-  self:log("Logs dumped to " .. file)
+  self:info("Logs dumped to " .. file)
   local f = fs.open(file, "w")
   f.write(self.linesText)
   f.close()
