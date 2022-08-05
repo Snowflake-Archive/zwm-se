@@ -5,6 +5,10 @@
     [ ] Menubars
     [ ] Buttons
     [ ] Inputs
-[X] Window manager
-[ ] Menu bar
+[ ] Window manager
+    [X] Basic window management features
+    [ ] Minimization
+[X] Menu bar
 [ ] Menu
+
+bugs:
