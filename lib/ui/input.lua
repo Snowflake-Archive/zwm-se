@@ -1,3 +1,7 @@
+--- Inputs with many features. Includes an event manager for the inputs aswell.
+-- @moudle[kind=ui] Input
+-- @author Marcus Wenzel
+
 local util = require(".lib.util")
 local strings = require("cc.strings")
 
@@ -14,6 +18,7 @@ local input = {
 -- @tparam[opt] boolean disabled Whether or not the input can be focused
 -- @tparam[opt] string default The default content of the input
 -- @tparam[opt] boolean enabled Whether or not the input is enabled. Default is true, if this is false the input won't render, nor will it be visible. 
+-- @return Input The net input.
 function input:new(x, y, w, onChange, onComplete, placeholder, disabled, default, enabled)
   local o = {
     x = x,
@@ -36,14 +41,17 @@ function input:new(x, y, w, onChange, onComplete, placeholder, disabled, default
   return o
 end
 
+--- Focuses an input.
 function input:focus()
   self.isFocused = true
 end
 
+--- Unfocuses an input.
 function input:unfocus()
   self.isFocused = false
 end
 
+--- Renders an input.
 function input:render()
   if self.enabled then
     self.bgOnRender = term.getBackgroundColor()
@@ -77,6 +85,8 @@ function input:render()
   end
 end
 
+--- Fires events (key & char) to an input
+-- @tparam table e The event table
 function input:fire(e)
   if e[1] == "char" then
     local c = e[2]
@@ -126,6 +136,8 @@ function input:fire(e)
   end
 end
 
+--- Creates a new manager for input event.
+-- @return InputEventManager The new input event manager.
 function input.eventManager:new()
   local o = {
     objects = {}
@@ -137,10 +149,14 @@ function input.eventManager:new()
   return o
 end
 
+--- Adds an input to the EventManager.
+-- @tparam Input input The input to add. 
 function input.eventManager:add(input)
   table.insert(self.objects, input)
 end
 
+--- Injects listeners into an event manager.
+-- @tparam EventManager manager The event manager to add to.
 function input.eventManager:inject(manager)
   manager:addListener("key", function(k)
     for i, v in pairs(self.objects) do

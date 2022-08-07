@@ -11,7 +11,7 @@ local inputEventManager = input.eventManager:new()
 local path = ""
 
 local okay = button:new(w - 4, h - 1, "OK", function()
-  _ENV.wm.addProcess(path, {}, true)
+  _ENV.wm.addProcess(path, { isCentered = true }, true)
   _ENV.wm.killProcess(_ENV.wm.id)
 end)
 
@@ -24,7 +24,7 @@ local path = input:new(2, 4, w - 4, function(content)
 end, function(content, type)
   path = content
   if type == "return" then
-    _ENV.wm.addProcess(content, {}, true)
+    _ENV.wm.addProcess(content, { isCentered = true }, true)
     _ENV.wm.killProcess(_ENV.wm.id)
   end
 end)

@@ -18,23 +18,21 @@ local windowRenderer = require(".bin.WindowManagerModules.WindowRenderer"):new(l
 local windowEvents = require(".bin.WindowManagerModules.WindowEvents"):new(logger, buffer)
 local menu = require(".bin.WindowManagerModules.Menu"):new(logger, buffer)
 
-local windowDraggingState
-local windowResizeState
-local backgroundLayers = {}
-local renderMenu = false
 local nextProcessId = 0
-
-local frameTime = 0
 
 xpcall(function()
   -- Functions
 
   local wm = {}
 
+  --- Gets the system's logger.
+  -- @return Logger The logger.
   function wm.getSystemLogger()
     return log
   end
 
+  --- Kills a process with the specified ID.
+  -- @tparam number id The ID.
   function wm.killProcess(idx)
     local p = processes[idx]
     p.coroutine = nil
@@ -50,10 +48,15 @@ xpcall(function()
     windowRenderer:renderProcesses(processes, displayOrder)
   end
 
+  --- Gets all running processes.
+  -- @return Process[] The processes.
   function wm.getProcesses()
     return processes
   end
 
+  --- Gets the size of the window manager.
+  -- @return number x The size in the X axis
+  -- @return number y The size in the Y axis
   function wm.getSize()
     return buffer.getSize()
   end
@@ -84,6 +87,9 @@ xpcall(function()
   end
 
   --- Creates a process
+  -- @tparam string|function The path/function to launch. Note that functions are not well supported.
+  -- @tparam Options options The options for the program.
+  -- @tparam[opt] boolean focused Whether or not the process will be focused when it is started
   function wm.addProcess(process, options, focused)
     local newProcess = {}
 
@@ -101,6 +107,11 @@ xpcall(function()
     end
 
     if options.isService ~= true then
+      if options.isCentered then
+        options.x = math.floor((w / 2 - (options.w or 25) / 2) + 0.5)
+        options.y = math.floor((h / 2 - (options.h or 10) / 2) + 0.5)
+      end
+
       newProcess.w = options.w or 25
       newProcess.h = options.h or 10
       newProcess.x = options.x or 2
@@ -153,30 +164,44 @@ xpcall(function()
         local endedGracefully = false
 
         xpcall(function()
-          local f = fs.open(path, "r")
-          local data = f.readAll()
-          f.close()
+          if fs.exists(path) then
+            local f = fs.open(path, "r")
+            local data = f.readAll()
+            f.close()
 
-          local f = load(data, "in " .. (newProcess.title or process))
+            local f = load(data, "in " .. (newProcess.title or process))
 
-          if f then
-            local env = _ENV
-            env.shell = shell
-            env.require, env.package = makePackage(env, "/")
-            env.wm = wm
-            env.wm.id = nextProcessId - 1
+            if f then
+              local env = _ENV
+              env.shell = shell
+              env.require, env.package = makePackage(env, "/")
+              env.wm = wm
+              env.wm.id = nextProcessId - 1
 
-            if options.env then
-              for i, v in pairs(options.env) do
-                if not env[i] then
-                  env[i] = v
+              if options.env then
+                for i, v in pairs(options.env) do
+                  if not env[i] then
+                    env[i] = v
+                  end
                 end
               end
-            end
 
-            setfenv(f, env)
-            f()
-            endedGracefully = true
+              setfenv(f, env)
+              f()
+              endedGracefully = true
+            end
+          else
+            wm.addProcess("/bin/Prompts/Error.lua", {
+              isCentered = true,
+              w = 32,
+              h = 9,
+              hideMinimize = true,
+              hideMaximize = true,
+              title = "Error",
+              env = {
+                errorText = "The requested path, " .. process .. ", does not exist."
+              }
+            })
           end
         end, function(stop)
           if endedGracefully == false then
@@ -190,8 +215,7 @@ xpcall(function()
                   traceback = trace
                 }
               },
-              x = math.floor(w / 2 + 0.5) - 15,
-              y = math.floor(h / 2 + 0.5) - 7,
+              isCentered = true,
               w = 30,
               h = 14,
               title = "Crash Report",
