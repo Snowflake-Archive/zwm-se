@@ -16,10 +16,10 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars)
   local newW, newH = w, h
 
   if renderScrollbars then
-    if renderScrollbars.X then
+    if renderScrollbars.x then
       newH = h - 1
     end
-    if renderScrollbars.Y then
+    if renderScrollbars.y then
       newW = w - 1
     end
   end
@@ -152,6 +152,21 @@ end
 -- @returns The X and Y scroll position.
 function scrollbox:getScroll()
   return self.scrollX, self.scrollY
+end
+
+function scrollbox:reposition(x, y, w, h)
+  local winW = self.w
+  if x then self.x = x end
+  if y then self.y = y end
+  if w then 
+    self.w = w
+    if self.doRenderScrollbars and self.doRenderScrollbars.y then
+      winW = self.w - 1
+    end
+  end
+  if h then self.h = h end
+
+  self.scrollWin.reposition(self.x, self.y, winW, self.h)
 end
 
 --- Scrolls the specified delta, and ensures it can be scrolled to.

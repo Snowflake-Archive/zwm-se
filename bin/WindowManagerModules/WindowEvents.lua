@@ -101,6 +101,11 @@ function events:windowDrag(e, processes)
     else
       p.window.reposition(p.x, p.y + 1, p.w, p.h - 1)
     end
+
+    local old = term.current()
+    term.redirect(p.window)
+    coroutine.resume(p.coroutine, "term_resize")
+    term.redirect(old)
   end
 end
 
@@ -165,8 +170,10 @@ function events:fire(e, processes, displayOrder)
 
       term.redirect(v.window)
 
+      if e[1] == "term_resize" then
+        coroutine.resume(v.coroutine)
       -- Focused redirection
-      if v.focused == true then
+      elseif v.focused == true then
         if e[1]:match("^mouse_%a+") then
           if e[3] >= v.x and e[3] <= v.x + v.w - 1 and e[4] >= v.y and e[4] <= v.y + v.h - 1 then
             self:redirectEventsForMouse(v, e, o, i)

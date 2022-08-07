@@ -4,6 +4,8 @@ local file = require(".lib.file")
 local logger = require(".lib.log")
 local registry = require(".lib.registry")
 
+local makePackage = dofile("rom/modules/main/cc/require.lua").make
+
 local log = logger:new(false)
 local native = term.current()
 local w, h = term.getSize()
@@ -20,13 +22,20 @@ local windowDraggingState
 local windowResizeState
 local backgroundLayers = {}
 local renderMenu = false
+local nextProcessId = 0
 
 local frameTime = 0
 
 xpcall(function()
   -- Functions
 
-  local function killProcess(idx)
+  local wm = {}
+
+  function wm.getSystemLogger()
+    return log
+  end
+
+  function wm.killProcess(idx)
     local p = processes[idx]
     p.coroutine = nil
     processes[idx] = nil
@@ -39,6 +48,14 @@ xpcall(function()
     end
 
     windowRenderer:renderProcesses(processes, displayOrder)
+  end
+
+  function wm.getProcesses()
+    return processes
+  end
+
+  function wm.getSize()
+    return buffer.getSize()
   end
 
   -- TODO: make this gracefully end a process, sending an "end" event to it, so the program can wrap up what it's doing / ask user to save, etc.
@@ -67,7 +84,7 @@ xpcall(function()
   end
 
   --- Creates a process
-  local function addProcess(process, options, focused)
+  function wm.addProcess(process, options, focused)
     local newProcess = {}
 
     logger:debug("Starting process %s", tostring(process))
@@ -88,7 +105,7 @@ xpcall(function()
       newProcess.h = options.h or 10
       newProcess.x = options.x or 2
       newProcess.y = options.y or 2
-      newProcess.title = options.title or (type(process) == "string" and fs.getName(process) or "Untitled")
+      newProcess.title = (options.title or (type(process) == "string" and fs.getName(process) or "Untitled"))
       newProcess.isResizeable = options.isResizeable == true or options.isResizeable == nil
       newProcess.hideFrame = options.hideFrame or false
       newProcess.visible = options.visible or true
@@ -133,20 +150,65 @@ xpcall(function()
       newProcess.coroutine = coroutine.create(function()
         logger:info("Started process %s", process)
         local path = process
+        local endedGracefully = false
 
         xpcall(function()
-          shell.run(path)
-        end, function(err)
-          logger:error("Process %s ended: \n%s %s", path, err, debug.traceback())
+          local f = fs.open(path, "r")
+          local data = f.readAll()
+          f.close()
+
+          local f = load(data, "in " .. (newProcess.title or process))
+
+          if f then
+            local env = _ENV
+            env.shell = shell
+            env.require, env.package = makePackage(env, "/")
+            env.wm = wm
+            env.wm.id = nextProcessId - 1
+
+            if options.env then
+              for i, v in pairs(options.env) do
+                if not env[i] then
+                  env[i] = v
+                end
+              end
+            end
+
+            setfenv(f, env)
+            f()
+            endedGracefully = true
+          end
+        end, function(stop)
+          if endedGracefully == false then
+            local trace = debug.traceback()
+            logger:error("Process %s ended: \n%s %s", path, stop, trace)
+            wm.addProcess("/bin/processStopped.lua", {
+              env = {
+                wmProcessStopInfo = {
+                  name = newProcess.title or "",
+                  error = stop,
+                  traceback = trace
+                }
+              },
+              x = math.floor(w / 2 + 0.5) - 15,
+              y = math.floor(h / 2 + 0.5) - 7,
+              w = 30,
+              h = 14,
+              title = "Crash Report",
+              hideMaximize = true,
+              hideMinimize = true
+            }, true)
+          end
         end)
       end)
     end
 
-    table.insert(processes, newProcess)
-    return #processes
+    processes[nextProcessId] = newProcess
+    nextProcessId = nextProcessId + 1
+    return nextProcessId - 1
   end
 
-  addProcess("/bin/Services/ServiceWorker.lua", {isService = true})
+  wm.addProcess("/bin/Services/ServiceWorker.lua", {isService = true})
 
   term.redirect(buffer)
   buffer.setBackgroundColor(colors.lightGray)
@@ -164,6 +226,7 @@ xpcall(function()
         -- == Events == --
 
         if e[1] == "term_resize" then
+          local nW, nH = native.getSize()
           w, h = nW, nH
           buffer.reposition(1, 1, w, h)
           logger:info("Resized to %d x %d", w, h)
@@ -172,7 +235,7 @@ xpcall(function()
           -- e[3]: path/func
           -- e[4]: options
           -- e[5]: focused
-          local id = addProcess(e[3], e[4], e[5])
+          local id = wm.addProcess(e[3], e[4], e[5])
           table.insert(displayOrder, 1, id)
 
           for i, v in pairs(processes) do
@@ -204,13 +267,13 @@ xpcall(function()
           displayOrder[1] = e[2]
         elseif e[1] == "killProcess" then
           -- e[2]: id of process to kill
-          killProcess(e[2])
+          wm.killProcess(e[2])
         end
 
         -- Dead Process Checking
         for i, v in pairs(processes) do
           if coroutine.status(v.coroutine) == "dead" then
-            killProcess(i)
+            wm.killProcess(i)
           end
       
           if v.isService and v.coroutine then
@@ -235,14 +298,15 @@ xpcall(function()
 
         ensureDisplayOrder()
         windowRenderer:renderProcesses(processes, displayOrder)
+        local cX, cY = term.getCursorPos()
 
         menu:render(processes)
+
+        term.setCursorPos(cX, cY)
 
         if anyFocused == false then
           term.setCursorBlink(false)
         end
-
-        
       end
     end,
     function()
@@ -258,6 +322,7 @@ xpcall(function()
         end
         local cursorPos = {buffer.getCursorPos()}
         local cursorBlink = buffer.getCursorBlink()
+        local color = buffer.getTextColor()
         native.setCursorBlink(false)
         for t = 1, h do
           native.setCursorPos(1, t)
@@ -265,6 +330,7 @@ xpcall(function()
         end
         native.setCursorBlink(cursorBlink)
         native.setCursorPos(table.unpack(cursorPos))
+        native.setTextColor(color)
         sleep()
       end
     end
