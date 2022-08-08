@@ -12,6 +12,7 @@ function menu:new(logger, buffer)
   self.buffer = buffer
   self.logger = logger
   self.processPositions = {}
+  self.isMenuVisible = false
 
   return o
 end
@@ -20,13 +21,20 @@ function menu:render(processes)
   local oldX, oldY = term.getCursorPos()
   local oldColor = term.getTextColor()
   term.redirect(self.buffer)
-
   local w, h = term.getSize()
-  term.setCursorPos(2, h)
+  term.setCursorPos(1, h)
+
   term.setTextColor(colors.white)
   term.setBackgroundColor(colors.gray)
   term.clearLine()
-  term.write("+")
+  
+  term.setTextColor(self.isMenuVisible and colors.lightGray or colors.white)
+  term.setBackgroundColor(self.isMenuVisible and colors.black or colors.gray)
+  
+  term.write(" + ")
+
+  term.setTextColor(colors.white)
+  term.setBackgroundColor(colors.gray)
 
   local time = os.time("ingame")
   local timeString = textutils.formatTime(time, true)
@@ -59,19 +67,35 @@ function menu:render(processes)
 
   util.drawPixelCharacter(w, h, false, true, false, true, false, true, colors.black, colors.gray)
 
+  if self.isMenuVisible then
+    paintutils.drawFilledBox()
+  end
+
   term.setTextColor(oldColor)
   term.setCursorPos(oldX, oldY)
 end
 
 function menu:fire(e)
   if e[1] == "mouse_click" then
-    local x, y = e[3], e[4]
-    if y == self.h then
-      for i, v in pairs(self.processPositions) do
-        if x >= v.min and x <= v.max then
-          os.queueEvent("focusProcess", v.id)
+    local m, x, y = e[2], e[3], e[4]
+    if m == 1 then
+      if y == self.h then
+        for i, v in pairs(self.processPositions) do
+          if x >= v.min and x <= v.max then
+            os.queueEvent("focusProcess", v.id)
+          end
         end
+
+        if x >= 1 and x <= 3 then
+          self.isMenuVisible = not self.isMenuVisible
+        else
+          self.isMenuVisible = false
+        end
+      else
+        self.isMenuVisible = false
       end
+    else
+      self.isMenuVisible = false
     end
   end
 end
