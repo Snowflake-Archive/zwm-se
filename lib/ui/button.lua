@@ -109,7 +109,7 @@ function button:click(isFirst)
   else
     self.isBeingClicked = false
     self.callback()
-    self:focus()
+    self:setFocused(true)
     self:render(true)
   end
 end

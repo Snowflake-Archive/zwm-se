@@ -50,11 +50,11 @@ function focusableEventManager:check(e)
           end
         elseif v.type == "input" then
           if x >= v.o.x and x <= v.o.x + v.o.w - 1 and v.o.y == y then
-            v.o:focus()
+            v.o:setFocused(true)
             v.o:render()
           elseif v.isFocused == true then
             v.o.onComplete(v.o.content, "defocus")
-            v.o:unfocus()    
+            v.o:setFocused(false) 
             v.o:render()
           end
         end
@@ -66,7 +66,7 @@ function focusableEventManager:check(e)
       if m == 1 then
         if v.type == "button" then
           if v.o.visible and v.o.y == y and x >= v.o.x and x <= v.o.x + #v.o.text + 1 and v.o.isBeingClicked == true then
-            v.o:focus()
+            v.o:setFocused(true)
             v.o:click()
           end
         end

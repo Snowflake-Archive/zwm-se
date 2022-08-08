@@ -32,7 +32,7 @@ end, function(content, type)
     _ENV.wm.killProcess(_ENV.wm.id)
   end
 end)
-path:focus()
+path:setFocused(true)
 
 local function render()
   local w, h = term.getSize()
