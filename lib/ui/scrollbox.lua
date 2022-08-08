@@ -1,6 +1,5 @@
 --- A fancy scrollbox creater that have scrollbars and scrolling boxes.
--- @moudle[kind=ui] Scrollbox
--- @author Marcus Wenzel
+-- @module[kind=ui] Scrollbox
 
 local scrollbox = {}
 
@@ -38,7 +37,7 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars)
     maxHeight = 0,
     doRenderScrollbars = renderScrollbars,
     parent = parent,
-    items = {}
+    items = {},
   }
 
   local function renderScrollbars()
@@ -68,7 +67,7 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars)
     local oldX, oldY = scrollWin.getCursorPos()
     local sX, sY = o.scrollX, o.scrollY
     scrollWin.clear()
-    for i, v in pairs(o.items) do
+    for _, v in pairs(o.items) do
       scrollWin.setCursorPos(v.x + sX - 1, v.y + sY - 1)
       scrollWin.blit(v.text, v.foreground, v.background)
     end
@@ -129,7 +128,7 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars)
     setVisible = function(value)
       scrollWin.setVisible(value)
     end,
-    redraw = redraw
+    redraw = redraw,
   }
 
   setmetatable(o, self)
@@ -149,11 +148,16 @@ function scrollbox:getTerminal()
 end
 
 --- Gets the scroll position of a scrollbox.
--- @returns The X and Y scroll position.
+-- @return The X and Y scroll position.
 function scrollbox:getScroll()
   return self.scrollX, self.scrollY
 end
 
+--- Repositions the scrollbox.
+-- @tparam number x The X position of the scrollbox.
+-- @tparam number y The Y position of the scrollbox.
+-- @tparam number w The width of the scrollbox.
+-- @tparam number h The height of the scrollbox.
 function scrollbox:reposition(x, y, w, h)
   local winW = self.w
   if x then self.x = x end
@@ -172,12 +176,12 @@ end
 --- Scrolls the specified delta, and ensures it can be scrolled to.
 -- @tparam number d The delta to scroll.
 function scrollbox:ensureScroll(d)
-  local sX, sY = self:getScroll()
-  local ssX, ssY = self.sbterm.getSize()
+  local _, sY = self:getScroll()
+  local _, ssY = self.sbterm.getSize()
 
   local canscroll = false
   if d == 1 then -- down
-    canscroll = (-sY + 2) < ssY
+    canscroll = -sY + 2 < ssY
   elseif d == -1 then -- up
     canscroll = sY <= 0
   end

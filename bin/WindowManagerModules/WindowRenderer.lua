@@ -30,7 +30,7 @@ function renderer:renderProcess(p, idx, diso)
 
   self.backgroundLayers = {}
 
-  if p.isService ~= true and p.visible == true then
+  if p.isService ~= true and p.minimized == false then
     if not p.hideFrame then
       -- Topbar Rendering
 

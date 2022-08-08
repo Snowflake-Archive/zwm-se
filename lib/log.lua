@@ -1,6 +1,5 @@
---- Logger
--- @moudle[kind=core] Logger
--- @author Marcus Wenzel
+--- A logger good enough for ComputerCraft.
+-- @module[kind=core] Logger
 
 local logger = {}
 
@@ -10,8 +9,8 @@ local lookup = {
   debug = "DBUG",
   info = "INFO",
   warning = "WARN",
-  error = "ERRO",
-  critical = "CRITICAL"
+  error = "ERROR",
+  critical = "CRITICAL",
 }
 
 --- Creates a new logger.
@@ -47,12 +46,12 @@ function logger:log(type, message, ...)
     fmsg = string.format(message, ...)
   end
 
-  line = ("[" .. (lookup[type] or type) .. "] " .. os.date("%X") .. ": " .. fmsg .. "\n")
+  local line = "[" .. (lookup[type] or type) .. "] " .. os.date("%X") .. ": " .. fmsg .. "\n"
 
   table.insert(self.lines, {
     type = type,
     message = fmsg,
-    time = os.date("%X")
+    time = os.date("%X"),
   })
 
   local handle = fs.open("log.log", "a")

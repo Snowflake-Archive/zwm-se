@@ -1,4 +1,3 @@
-local wm = require(".lib.wm")
 local logger = wm.getSystemLogger()
 
 local debounce = false
@@ -9,7 +8,7 @@ local hotkeys = {
     name = "Open Run Menu (CTRL+SHIFT+R)",
     keys = {keys.leftCtrl, keys.leftShift, keys.r},
     f = function()
-      wm.launch("/bin/run.lua", {
+      _ENV.wm.addProcess("/bin/run.lua", {
         w = 27,
         h = 9,
         x = 2,
@@ -25,7 +24,7 @@ local hotkeys = {
     name = "Open Shell (CTRL+SHIFT+T)",
     keys = {keys.leftCtrl, keys.leftShift, keys.t},
     f = function()
-      wm.launch("/rom/programs/shell.lua", {
+      _ENV.wm.addProcess("/rom/programs/shell.lua", {
         title = "Shell"
       }, true)
     end
@@ -34,7 +33,7 @@ local hotkeys = {
     name = "Open Lua (CTRL+SHIFT+L)",
     keys = {keys.leftCtrl, keys.leftShift, keys.l},
     f = function()
-      wm.launch("/rom/programs/lua.lua", {
+      _ENV.wm.addProcess("/rom/programs/lua.lua", {
         title = "Lua"
       }, true)
     end
@@ -43,7 +42,7 @@ local hotkeys = {
     name = "Error Test (CTRL+SHIFT+E)",
     keys = {keys.leftCtrl, keys.leftShift, keys.e},
     f = function()
-      wm.launch("/bin/errortest.lua", {
+      _ENV.wm.addProcess("/bin/errortest.lua", {
         title = "ErrorTestAwooga"
       }, true)
     end

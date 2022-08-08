@@ -18,12 +18,14 @@ local windowRenderer = require(".bin.WindowManagerModules.WindowRenderer"):new(l
 local windowEvents = require(".bin.WindowManagerModules.WindowEvents"):new(logger, buffer)
 local menu = require(".bin.WindowManagerModules.Menu"):new(logger, buffer)
 
+--- The window manager and it's functions.
+-- @module[kind=core] WindowManager
+local wm = {}
+
 local nextProcessId = 0
 
 xpcall(function()
   -- Functions
-
-  local wm = {}
 
   --- Gets the system's logger.
   -- @return Logger The logger.
@@ -80,7 +82,7 @@ xpcall(function()
         end
       end
 
-      if hasDisplayOrder == false and v.isService ~= true and v.visible == true then
+      if hasDisplayOrder == false and v.isService ~= true and v.minimized == false then
         table.insert(displayOrder, i)
       end
     end
@@ -119,16 +121,15 @@ xpcall(function()
       newProcess.title = (options.title or (type(process) == "string" and fs.getName(process) or "Untitled"))
       newProcess.isResizeable = options.isResizeable == true or options.isResizeable == nil
       newProcess.hideFrame = options.hideFrame or false
-      newProcess.visible = options.visible or true
+      newProcess.minimized = options.minimized or false
+      newProcess.maxamized = options.maxamized or false
+      
+      newProcess.hideMaximize = options.hideMaximize or false
+      newProcess.hideMinimize = options.hideMinimize or false
 
       newProcess.focused = focused or false
 
       table.insert(displayOrder, 1, #processes + 1)
-
-      newProcess.hideMaximize = options.hideMaximize or false
-      newProcess.hideMinimize = options.hideMinimize or false
-
-      newProcess.isMaxamized = false
 
       local w
 
@@ -139,7 +140,7 @@ xpcall(function()
           newProcess.y, 
           newProcess.w, 
           newProcess.h, 
-          newProcess.visible
+          not newProcess.minimized
         )
       else
         w = window.create(
@@ -148,7 +149,7 @@ xpcall(function()
           newProcess.y + 1, 
           newProcess.w, 
           newProcess.h - 1, 
-          newProcess.visible
+          not newProcess.minimized
         )
       end
 

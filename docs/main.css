@@ -542,3 +542,17 @@ body.searching #search-overlay {
   width: 100%; height: 100%;
   transition: opacity ease 400ms, width 0s, height 0s;
 }
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table td,
+table th {
+  border: 1px solid #cccccc3f;
+  padding: 0.25rem 0.6rem;
+}
+
+table th {
+  background-color: var(--background-2);
+}

@@ -1,6 +1,5 @@
 --- A basic event manager, allows for adding multiple listeners to an event.
--- @moudle[kind=core] EventManager
--- @author Marcus Wenzel
+-- @module[kind=core] EventManager
 
 local eventManager = {}
 
@@ -17,6 +16,7 @@ function eventManager:new()
   return o
 end
 
+--- Stops the event manager.
 function eventManager:stop()
   self.isStopped = true
 end
@@ -26,7 +26,7 @@ end
 -- @tparam function callback The callback to call when the event is fired
 function eventManager:addListener(listener, callback)
   if type(listener) == "table" then
-    for l, v in ipairs(listener) do
+    for i, v in pairs(listener) do
       if self.listeners[i] then
         table.insert(self.listeners[i], v)
       else
@@ -46,7 +46,7 @@ end
 -- @tparam table e A packed os.pullEvent response.
 function eventManager:check(e)
   if self.listeners[e[1]] then
-    for i, v in ipairs(self.listeners[e[1]]) do
+    for _, v in ipairs(self.listeners[e[1]]) do
       v(unpack(e, 2))
     end
   end
@@ -64,7 +64,7 @@ function eventManager:listen(useRaw)
     end
 
     if self.listeners[e[1]] then
-      for i, v in ipairs(self.listeners[e[1]]) do
+      for _, v in ipairs(self.listeners[e[1]]) do
         v(unpack(e, 2))
       end
     end

@@ -1,0 +1,92 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>ProcessOptions</title><meta property="og:title" content="ProcessOptions" /><meta property="og:type" content="website" /><meta name="description" content="A table containing options to start a process." /><meta property="og:description" content="A table containing options to start a process." /><meta property="og:site_name" content="zwm SE" /><link rel="stylesheet" href="..\main.css?v=9307605b" type="text/css" /></head><body><nav id="nav"><button id="nav-reveal" type="button">&#9776;</button><h1><a href="..\.\">zwm SE</a></h1><div class="nav-links"><h2 class="collapsed" tabindex="0">Modules</h2><ul><li><a href="..\library\wm.html" class="sidebar-link">wm</a></li></ul><h2 class="collapsed" tabindex="0">Core</h2><ul><li><a href="..\core\EventManager.html" class="sidebar-link">EventManager</a></li><li><a href="..\core\FileUtils.html" class="sidebar-link">FileUtils</a></li><li><a href="..\core\Logger.html" class="sidebar-link">Logger</a></li><li><a href="..\core\Registry.html" class="sidebar-link">Registry</a></li><li><a href="..\core\Utils.html" class="sidebar-link">Utils</a></li></ul><h2 class="collapsed" tabindex="0">UI</h2><ul><li><a href="..\ui\Button.html" class="sidebar-link">Button</a></li><li><a href="..\ui\FocusableEventManager.html" class="sidebar-link">FocusableEventManager</a></li><li><a href="..\ui\Input.html" class="sidebar-link">Input</a></li><li><a href="..\ui\Scrollbox.html" class="sidebar-link">Scrollbox</a></li></ul><h2 tabindex="0">Tables</h2><ul><li><strong class="sidebar-link selected">ProcessOptions</strong></li></ul></div></nav><div id="main"><div id="search-form" role="form"><input id="search-box" type="text" placeholder="Search..." autocomplete="off" tabindex="0"></input><div id="search-results"></div></div><section id="content"><h1>ProcessOptions</h1><p>A table containing options to start a process. All values below are optional, and do have defaults.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Default Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>isService</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>If this is true, the process will run in the background and ignore all draw requests. It will also not get key or mouse events.</td>
+</tr>
+<tr>
+<td><code>x</code></td>
+<td><code>number</code></td>
+<td><code>2</code></td>
+<td>The X position of the window.</td>
+</tr>
+<tr>
+<td><code>y</code></td>
+<td><code>number</code></td>
+<td><code>2</code></td>
+<td>The Y position of the window.</td>
+</tr>
+<tr>
+<td><code>w</code></td>
+<td><code>number</code></td>
+<td><code>25</code></td>
+<td>The width of the window.</td>
+</tr>
+<tr>
+<td><code>h</code></td>
+<td><code>number</code></td>
+<td><code>10</code></td>
+<td>The height of the window.</td>
+</tr>
+<tr>
+<td><code>isCentered</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>If this is true, the window will be centered when the process starts. This overrides the X and Y options.</td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td><code>string</code></td>
+<td><code>&quot;Untitled&quot;</code></td>
+<td>The title of the process. If the process was started using a path, the title of the process (if none is provided) will be the file name of the path.</td>
+</tr>
+<tr>
+<td><code>hideFrame</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>If set to true, the process will render with no frame (close buttons, maxamize, etc)</td>
+</tr>
+<tr>
+<td><code>minimized</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>If set to true, the process will be minimized when started.</td>
+</tr>
+<tr>
+<td><code>maxamized</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>If set to true, the process will be maxamized when started.</td>
+</tr>
+<tr>
+<td><code>hideMinimize</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>If set to true, the minimize button will be hidden in the window's titlebar.</td>
+</tr>
+<tr>
+<td><code>hideMaxamize</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>If set to true, the maxamize button will be hidden in the window's titlebar.</td>
+</tr>
+<tr>
+<td><code>env</code></td>
+<td><code>table</code></td>
+<td><code>{}</code></td>
+<td>An enviroment to pass to the window manager. Note this will not override any existing enviroment values (e.g. wm, and CraftOS term stuffs)</td>
+</tr>
+</tbody>
+</table>
+</section><footer>Last updated on 2022-08-08</footer></div><div id="search-overlay"></div><script src="..\main.js?v=0f849364" type="text/javascript" defer=""></script></body></html>

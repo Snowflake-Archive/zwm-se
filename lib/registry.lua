@@ -1,6 +1,5 @@
---- Registry getter & editor
--- @moudle[kind=core] Registry
--- @author Marcus Wenzel
+--- Registry getter & editor utilities
+-- @module[kind=core] Registry
 
 local file = require(".lib.file")
 
@@ -127,7 +126,7 @@ function registry.update(old, new)
   local function readFolder(old, new)
     local value = {
       values = {},
-      folders = {}
+      folders = {},
     }
 
     for i, v in pairs(new.values) do

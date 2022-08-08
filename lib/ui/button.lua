@@ -1,20 +1,17 @@
---- Buttons
--- @moudle[kind=ui] Button
--- @author Marcus Wenzel
+--- Really fancy buttons
+-- @module[kind=ui] Button
 
 local util = require(".lib.util")
 
-local button = {
-  eventManager = {}
-}
+local button = {}
 
 --- Creates a new button. The buttons width will be #text + 4.
 -- @tparam number x The X position of the button
 -- @tparam number y The Y position of the button
 -- @tparam string text The text that will be rendered inside the button.
 -- @tparam function callback The function that is ran when the button is clicked.
--- @tparam boolean disabled If this is true, the button will be grayed out and not be selectable.
--- @tparam boolean visible If this is false, the button will not be rendered, nor selectable.
+-- @tparam[opt] boolean disabled If this is true, the button will be grayed out and not be selectable.
+-- @tparam[opt] boolean visible If this is false, the button will not be rendered, nor selectable.
 -- @return Button The new button.
 function button:new(x, y, text, callback, disabled, visible)
   local o = {
@@ -56,14 +53,21 @@ function button:setDisabled(disabled)
   self:render(true)
 end
 
---- Sets whether or not the button is visible.
+--- Sets whether or not the button is visible. Note that the whole screen will need to be re-rendered to make the button disappear.
 -- @tparam boolean visible Whether or not the button is disabled.
 function button:setVisible(visible)
   self.visible = visible == true
 end
 
+--- Sets whether or not the button is focused.
+-- @tparam boolean focused Whether or not the button is focused.
+function button:setFocused(focused)
+  self.isFocused = focused == true
+  self:render(true)
+end
+
 --- Renders the button.
--- @tparam boolean useBgRender If this is true, the button will be rendered with the same background color used to render it last time.
+-- @tparam[opt] boolean useBgRender If this is true, the button will be rendered with the same background color used to render it last time.
 function button:render(useBgRender)
   if self.visible == true then
     local oX, oY = term.getCursorPos()
@@ -96,20 +100,8 @@ function button:render(useBgRender)
   end
 end
 
---- Focuses a button.
-function button:focus()
-  self.isFocused = true
-  self:render(true)
-end
-
---- Unfocuses a button.
-function button:unfocus()
-  self.isFocused = false
-  self:render(true)
-end
-
 --- Clicks a button.
--- @tparam boolean isFirst This is used for clicking with the mouse, mouse_click will make this true.  
+-- @tparam[opt] boolean isFirst This is used for clicking with the mouse, mouse_click will make this true.  
 function button:click(isFirst)
   if isFirst == true then
     self.isBeingClicked = true
@@ -120,57 +112,6 @@ function button:click(isFirst)
     self:focus()
     self:render(true)
   end
-end
-
---- Creates a new ButtonEventManager.
--- @return ButtonEventManager The event manager.
-function button.eventManager:new()
-  local o = {
-    buttons = {}
-  }
-
-  setmetatable(o, self)
-  self.__index = self
-
-  return o
-end
-
---- Adds a button to the ButtonEventManager.
--- @tparam Button button The button to add.
-function button.eventManager:add(button)
-  table.insert(self.buttons, button)
-end
-
---- Injects listeners into an EventManager.
--- @tparam EventManager manager The event manager to add to.
-function button.eventManager:inject(manager)
-  manager:addListener("mouse_click", function(m, x, y)
-    if m == 1 then
-      for i, v in pairs(self.buttons) do
-        if v.enabled and v.renderedWidth and y == v.y and x >= v.x and x <= v.x + v.renderedWidth - 1 then        
-          v:click(true)
-        else
-          v.isFocused = false
-          v:render(true)
-        end
-      end
-    end
-  end)
-
-  manager:addListener("mouse_up", function(m, x, y)
-    if m == 1 then
-      for i, v in pairs(self.buttons) do
-        if v.enabled and v.y == y and x >= v.x and x <= v.x + #v.text + 1 and v.isBeingClicked == true then
-          v:click()
-        end
-      end
-
-      for i, v in pairs(self.buttons) do
-        v.isBeingClicked = false
-        v:render(true)
-      end
-    end
-  end)
 end
 
 return button

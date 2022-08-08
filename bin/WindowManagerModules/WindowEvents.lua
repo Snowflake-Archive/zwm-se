@@ -26,9 +26,9 @@ function events:redirectEventsForMouse(p, e, idx, diso)
           elseif p.hideMaximize == true then
 
           else
-            p.isMaxamized = not p.isMaxamized
+            p.maxamized = not p.maxamized
 
-            if p.isMaxamized then
+            if p.maxamized then
               p.w_orig = p.w
               p.h_orig = p.h
               p.x_orig = p.x
@@ -47,7 +47,7 @@ function events:redirectEventsForMouse(p, e, idx, diso)
               p.window.reposition(p.x, p.y + 1, p.w, p.h - 1)
             end
           end
-        elseif p.isMaxamized == false then
+        elseif p.maxamized == false then
           self.windowDraggingState = {
             x = e[3],
             y = e[4],
@@ -179,7 +179,7 @@ function events:fire(e, processes, displayOrder)
             self:redirectEventsForMouse(v, e, o, i)
             didHitMouse = true
           elseif e[2] == 1 and e[3] == v.x + v.w and e[4] == v.y + v.h and v.isResizeable == true and
-            v.isMaxamized == false then
+            v.maxamized == false then
             didHitMouse = true
             self.windowResizeState = {
                 x = e[3],
@@ -201,7 +201,7 @@ function events:fire(e, processes, displayOrder)
           canRedirect = false
         end
 
-        if e[1] == "mouse_click" and gotFocusTarget == false and didHitMouse == false then
+        if v.minimized == false and e[1] == "mouse_click" and gotFocusTarget == false and didHitMouse == false then
           if e[3] >= v.x and e[3] <= v.x + v.w - 1 and e[4] >= v.y and e[4] <= v.y + v.h - 1 then
             for i, v in pairs(processes) do
               v.focused = false

@@ -1,6 +1,5 @@
---- File utilities
--- @moudle[kind=core] FileUtils
--- @author Marcus Wenzel
+--- File utilities for saving and reading files
+-- @module[kind=core] FileUtils
 
 local file = {}
 

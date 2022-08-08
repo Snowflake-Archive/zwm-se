@@ -1,13 +1,10 @@
 --- Inputs with many features. Includes an event manager for the inputs aswell.
--- @moudle[kind=ui] Input
--- @author Marcus Wenzel
+-- @module[kind=ui] Input
 
 local util = require(".lib.util")
 local strings = require("cc.strings")
 
-local input = {
-  eventManager = {}
-}
+local input = {}
 
 --- Creates a new input object.
 -- @tparam number x The X position of the input.
@@ -41,14 +38,53 @@ function input:new(x, y, w, onChange, onComplete, placeholder, disabled, default
   return o
 end
 
---- Focuses an input.
-function input:focus()
-  self.isFocused = true
+--- Repositions an input.
+-- @tparam number x The X position to move the input to.
+-- @tparam number y The Y position to move the input to.
+function input:reposition(x, y)
+  self.x = x 
+  self.y = y
 end
 
---- Unfocuses an input.
-function input:unfocus()
-  self.isFocused = false
+--- Sets the content of the input.
+-- @tparam string content The new content of the input.
+function input:setContent(content)
+  self.content = content
+  self:render(true)
+end
+
+--- Sets whether or not the input is disabled. If this is true, the input will be greyed out and not selectable.
+-- @tparam boolean disabled Whether the input is disabled or not.
+function input:setDisabled(disabled)
+  self.disabled = disabled == true
+  self:render(true)
+end
+
+--- Sets whether or not the input is visible. Note that the whole screen will need to be re-rendered to make the input disappear.
+-- @tparam boolean visible Whether or not the input is disabled.
+function input:setVisible(visible)
+  self.visible = visible == true
+end
+
+--- Sets whether or not the input is focused.
+-- @tparam boolean focused Whether or not the input is focused.
+function input:setFocused(focused)
+  self.isFocused = focused == true
+  self:render(true)
+end
+
+--- Sets the placeholder for the input.
+-- @tparam boolean focused Whether or not the input is focused.
+function input:setPlaceholder(placeholder)
+  self.placeholder = placeholder
+  self:render(true)
+end
+
+--- Resizes the input.
+-- @tparam number w The new width of the input.
+function input:resize(w)
+  self.w = w
+  self:render(true)
 end
 
 --- Renders an input.
@@ -134,60 +170,6 @@ function input:fire(e)
       self:render()
     end
   end
-end
-
---- Creates a new manager for input event.
--- @return InputEventManager The new input event manager.
-function input.eventManager:new()
-  local o = {
-    objects = {}
-  }
-
-  setmetatable(o, self)
-  self.__index = self
-
-  return o
-end
-
---- Adds an input to the EventManager.
--- @tparam Input input The input to add. 
-function input.eventManager:add(input)
-  table.insert(self.objects, input)
-end
-
---- Injects listeners into an event manager.
--- @tparam EventManager manager The event manager to add to.
-function input.eventManager:inject(manager)
-  manager:addListener("key", function(k)
-    for i, v in pairs(self.objects) do
-      if v.isFocused then
-        v:fire({"key", k})
-      end
-    end
-  end)
-
-  manager:addListener("char", function(c)
-    for i, v in pairs(self.objects) do
-      if v.isFocused then
-        v:fire({"char", c})
-      end
-    end
-  end)
-
-  manager:addListener("mouse_click", function(m, x, y)
-    if m == 1 then
-      for i, v in pairs(self.objects) do
-        if x >= v.x and x <= v.x + v.w - 1 and v.y == y then
-          v:focus()
-          v:render()
-        elseif v.isFocused == true then
-          v.onComplete(v.content, "defocus")
-          v:unfocus()    
-          v:render()
-        end
-      end
-    end
-  end)
 end
 
 return input

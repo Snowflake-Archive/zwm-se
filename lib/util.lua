@@ -1,9 +1,15 @@
---- Some utilities
--- @moudle[kind=core] Utils
--- @author Marcus Wenzel
+--- Miscellaneous utilities
+-- @module[kind=core] Utils
 
 local utils = {}
 
+--- Gets a drawing character from the cells that are set to true.
+-- @tparam boolean tl Draw top left cell.
+-- @tparam boolean tr Draw top right cell.
+-- @tparam boolean l Draw middle left cell.
+-- @tparam boolean r Draw middle left cell.
+-- @tparam boolean bl Draw bottom left cell.
+-- @tparam boolean br Draw bottom right cell.
 function utils.getPixelChar(tl, tr, l, r, bl, br)
   local data = 128
   if not br then
@@ -34,9 +40,8 @@ end
 -- @tparam boolean br Draw bottom right cell.
 -- @tparam number tc Foreground color
 -- @tparam number bc Background color
--- @author thonkinator#8473
 function utils.drawPixelCharacter(x, y, tl, tr, l, r, bl, br, tc, bc)
-  term.setCursorPos(x,y)
+  term.setCursorPos(x, y)
   local char, invert = utils.getPixelChar(tl, tr, l, r, bl, br)
 
   if invert then
@@ -59,7 +64,7 @@ function utils.fromBlit(blit)
   return 2 ^ tonumber(blit, 16)
 end
 
---- Converts a blit to a color number
+--- Selects an X position from a blit string (or just any string really)
 -- @tparam number x The X position to pull
 -- @tparam string blit The blit string to pull from
 -- @return number The color
@@ -102,7 +107,7 @@ function utils.drawBorder(x, y, w, h, color, style)
       term.write(sideDrawChar)
     end
 
-    utils.drawPixelCharacter(x, y + h - 1, false, true, false, false, false, bottom, color, bg)
+    utils.drawPixelCharacter(x, y + h - 1, false, true, false, false, false, false, color, bg)
     
     local bottomDrawChar = utils.getPixelChar(true, true, false, false, false, false)
     term.setBackgroundColor(bg)

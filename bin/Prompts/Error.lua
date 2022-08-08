@@ -4,9 +4,10 @@ local nft = require("cc.image.nft")
 local strings = require("cc.strings")
 local buttons = require(".lib.ui.button")
 local events = require(".lib.events")
+local focusableEventManager = require(".lib.ui.focusableEventManager")
 
 local manager = events:new()
-local buttonManager = buttons.eventManager:new()
+local eventManager = focusableEventManager:new()
 local x = nft.load("/bin/Assets/x.nft")
 local w, h = term.getSize()
 
@@ -16,8 +17,8 @@ local ok = buttons:new(w - 5, h - 1, "OK", function()
   _ENV.wm.killProcess(_ENV.wm.id)
 end)
 
-buttonManager:inject(manager)
-buttonManager:add(ok)
+eventManager:inject(manager)
+eventManager:addButton(ok)
 
 local function render()
   w, h = term.getSize()
