@@ -284,6 +284,7 @@ xpcall(function()
             v.focused = false
             if i == e[2] then
               v.focused = true
+              v.minimized = false
             end
           end
 

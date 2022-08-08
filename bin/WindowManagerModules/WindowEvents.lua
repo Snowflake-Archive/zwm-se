@@ -24,7 +24,8 @@ function events:redirectEventsForMouse(p, e, idx, diso)
           if p.hideMaximize == true and p.hideMinimize == true then
             return
           elseif p.hideMaximize == true then
-
+            p.minimized = true
+            p.focused = false
           else
             p.maxamized = not p.maxamized
 
@@ -46,6 +47,13 @@ function events:redirectEventsForMouse(p, e, idx, diso)
               p.y = p.y_orig
               p.window.reposition(p.x, p.y + 1, p.w, p.h - 1)
             end
+          end
+        elseif e[3] >= p.x + p.w - 9 and e[3] <= p.x + p.w - 5 then
+          if p.hideMinimize == true or p.hideMaxamize then
+            return
+          else
+            p.minimized = true
+            p.focused = false
           end
         elseif p.maxamized == false then
           self.windowDraggingState = {
