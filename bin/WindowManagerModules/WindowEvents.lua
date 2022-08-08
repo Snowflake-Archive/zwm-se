@@ -1,10 +1,11 @@
 local events = {}
+local w, h = term.getSize()
 
 local function redirect(process, e)
   if e[1] ~= "timer" then
     local se = ""
 
-    for i, v in pairs(e) do
+    for _, v in pairs(e) do
       se = se .. " " .. tostring(v)
     end
   end
@@ -12,7 +13,7 @@ local function redirect(process, e)
   coroutine.resume(process.coroutine, unpack(e))
 end
 
-function events:redirectEventsForMouse(p, e, idx, diso)
+function events:redirectEventsForMouse(p, e, idx)
   if p.hideFrame then
     redirect(p, {e[1], e[2], e[3] - p.x, e[4] - p.y}) 
   else
@@ -148,7 +149,7 @@ function events:fire(e, processes, displayOrder)
   if e[1] ~= "timer" then
     local se = ""
 
-    for i, v in pairs(e) do
+    for _, v in pairs(e) do
       se = se .. " " .. tostring(v)
     end
 
@@ -167,7 +168,6 @@ function events:fire(e, processes, displayOrder)
 
   -- Checking events
   for i = 1, #displayOrder, 1 do
-    local newOrder = i
     local o = displayOrder[i] -- display order index
     local v = processes[o] -- process
 
@@ -211,7 +211,7 @@ function events:fire(e, processes, displayOrder)
 
         if v.minimized == false and e[1] == "mouse_click" and gotFocusTarget == false and didHitMouse == false then
           if e[3] >= v.x and e[3] <= v.x + v.w - 1 and e[4] >= v.y and e[4] <= v.y + v.h - 1 then
-            for i, v in pairs(processes) do
+            for _, v in pairs(processes) do
               v.focused = false
             end
             v.focused = true
@@ -241,7 +241,7 @@ function events:fire(e, processes, displayOrder)
   term.redirect(self.buffer)
 
   if didHitMouse == false and e[1]:match("^mouse_%a+") and e[4] ~= h then
-    for i, v in pairs(processes) do
+    for _, v in pairs(processes) do
       if v.focused == true then
         v.focused = false
         break

@@ -8,7 +8,7 @@ function wm.getSystemLogger() end
 
 --- Kills a process with the specified ID.
 -- @tparam number id The ID.
-function wm.killProcess(idx) end
+function wm.killProcess() end
 
 --- Gets all running processes.
 -- @return Process[] The processes.
@@ -24,6 +24,6 @@ function wm.getSize() end
 -- @tparam ProcessOptions options The options for the program.
 -- @tparam[opt] boolean focused Whether or not the process will be focused when it is started
 -- @see ProcessOptions
-function wm.addProcess(process, options, focused) end
+function wm.addProcess() end
 
 return wm

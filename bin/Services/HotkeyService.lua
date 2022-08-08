@@ -1,7 +1,7 @@
-local logger = wm.getSystemLogger()
+local logger = _ENV.wm.getSystemLogger()
 
 local debounce = false
-local w, h = term.getSize()
+local _, h = term.getSize()
 
 local hotkeys = {
   {
@@ -18,34 +18,34 @@ local hotkeys = {
         hideMaximize = true,
         hideMinimize = true,
       }, true)
-    end
+    end,
   },
   {
     name = "Open Shell (CTRL+SHIFT+T)",
     keys = {keys.leftCtrl, keys.leftShift, keys.t},
     f = function()
       _ENV.wm.addProcess("/rom/programs/shell.lua", {
-        title = "Shell"
+        title = "Shell",
       }, true)
-    end
+    end,
   },
   {
     name = "Open Lua (CTRL+SHIFT+L)",
     keys = {keys.leftCtrl, keys.leftShift, keys.l},
     f = function()
       _ENV.wm.addProcess("/rom/programs/lua.lua", {
-        title = "Lua"
+        title = "Lua",
       }, true)
-    end
+    end,
   },
   {
     name = "Error Test (CTRL+SHIFT+E)",
     keys = {keys.leftCtrl, keys.leftShift, keys.e},
     f = function()
-      _ENV.wm.addProcess("/bin/errortest.lua", {
+      _ENV.wm.addProcess("/bin/errort,est.lua", {
         title = "ErrorTestAwooga"
       }, true)
-    end
+    end,
   }
 }
 
@@ -63,11 +63,11 @@ while true do
     heldKeys[e[2]] = nil
     debounce = false
   elseif e[1] == "term_resize" then
-    w, h = term.getSize()
+    _, h = term.getSize()
   end
 
   if debounce == false then
-    for i, v in pairs(hotkeys) do
+    for _, v in pairs(hotkeys) do
       local ok = true
 
       for _, k in pairs(v.keys) do
@@ -79,7 +79,7 @@ while true do
 
       local heldCount = 0
 
-      for i, v in pairs(heldKeys) do
+      for _, v in pairs(heldKeys) do
         if v == true then
           heldCount = heldCount + 1
         end

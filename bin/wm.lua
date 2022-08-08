@@ -1,6 +1,4 @@
 -- Module imports
-local util = require(".lib.util")
-local file = require(".lib.file")
 local logger = require(".lib.log")
 local registry = require(".lib.registry")
 
@@ -65,9 +63,9 @@ xpcall(function()
 
   -- TODO: make this gracefully end a process, sending an "end" event to it, so the program can wrap up what it's doing / ask user to save, etc.
   -- the process respond with an "end-receive" to ensure it supports this functionality, and "end-ready" to indiciate it's ready to be removed.
-  local function endProcess()
+  --local function endProcess()
 
-  end
+  --end
 
   local function ensureDisplayOrder()
     for i, v in pairs(processes) do
@@ -99,7 +97,7 @@ xpcall(function()
     newProcess.isService = options.isService == true
 
     if focused then
-      for i, v in pairs(processes) do
+      for _, v in pairs(processes) do
         v.focused = false
       end
     end
@@ -263,7 +261,7 @@ xpcall(function()
           local id = wm.addProcess(e[3], e[4], e[5])
           table.insert(displayOrder, 1, id)
 
-          for i, v in pairs(processes) do
+          for _, v in pairs(processes) do
             if v.window then
               term.redirect(v.window)
             end
@@ -271,7 +269,7 @@ xpcall(function()
             coroutine.resume(v.coroutine, "launched", e[2])
           end
         elseif e[1] == "getSystemLogger" then
-          for i, v in pairs(processes) do
+          for _, v in pairs(processes) do
             if v.window then
               term.redirect(v.window)
             end
@@ -288,7 +286,7 @@ xpcall(function()
             end
           end
 
-          table.remove(displayOrder, i)
+          table.remove(displayOrder, 1)
           table.insert(displayOrder, 1, "")
           displayOrder[1] = e[2]
         elseif e[1] == "killProcess" then
@@ -313,7 +311,7 @@ xpcall(function()
         -- == Rendering == --
 
         local anyFocused = false
-        for i, v in pairs(processes) do
+        for _, v in pairs(processes) do
           if v.focused then
             anyFocused = true
           end
@@ -341,7 +339,7 @@ xpcall(function()
       term.redirect(buffer)
 
       while true do
-        local w, h = buffer.getSize()
+        local _, h = buffer.getSize()
 
         for t = 0, 15 do
           native.setPaletteColor(2^t, buffer.getPaletteColor(2^t))
@@ -374,7 +372,7 @@ end, function(err)
   local so, se
 
   if err ~= "Terminated" then
-    local so, se = pcall(function()
+    so, se = pcall(function()
       filename = "crash-" .. os.date("%m-%d-%y_%H-%M-%S") .. ".log"
       log:dump("/" .. filename)
     end)

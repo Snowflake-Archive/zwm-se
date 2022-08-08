@@ -80,7 +80,7 @@ function menu:fire(e)
     local m, x, y = e[2], e[3], e[4]
     if m == 1 then
       if y == self.h then
-        for i, v in pairs(self.processPositions) do
+        for _, v in pairs(self.processPositions) do
           if x >= v.min and x <= v.max then
             os.queueEvent("focusProcess", v.id)
           end

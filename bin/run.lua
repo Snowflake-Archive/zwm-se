@@ -35,7 +35,7 @@ end)
 path:setFocused(true)
 
 local function render()
-  local w, h = term.getSize()
+  w, h = term.getSize()
   term.setBackgroundColor(colors.white)
   term.setTextColor(colors.black)
   term.clear()

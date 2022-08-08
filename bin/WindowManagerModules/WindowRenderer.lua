@@ -21,9 +21,7 @@ end
 
 --- Renders a single process.
 -- @tparam Process process The process to render.
--- @tparam number idx The index of the process.
--- @tparam number diso The display order of the process.
-function renderer:renderProcess(p, idx, diso)
+function renderer:renderProcess(p)
   local oTerm = term.current()
   term.redirect(self.buffer)
   local w, h = self.buffer.getSize()
@@ -67,7 +65,7 @@ function renderer:renderProcess(p, idx, diso)
       if p.x >= 2 then
         for i = 1, p.h do
           if p.y + i - 1 <= h then
-            local _, lineA, lineB = self.buffer.getLine(p.y + i - 1)
+            local _, _, lineB = self.buffer.getLine(p.y + i - 1)
 
             local use = util.fromBlit(util.selectXfromBlit(p.x - 1, lineB))
 

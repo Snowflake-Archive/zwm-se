@@ -4,7 +4,7 @@ local services = {
   "/bin/Services/HotkeyService.lua",
 }
 
-local logger = wm.getSystemLogger()
+local logger = _ENV.wm.getSystemLogger()
 
 logger:info("[ServiceWorker] Service worker started")
 
