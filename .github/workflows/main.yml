@@ -1,0 +1,40 @@
+# most docs building thanks to SkyTheCodeMaster
+
+name: Generate Docs
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build Docs
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup illuaminate
+        run: |
+          test -d bin || mkdir bin
+          test -f bin/illuaminate || wget -q -Obin/illuaminate https://squiddev.cc/illuaminate/linux-x86-64/illuaminate
+          chmod +x bin/illuaminate
+
+      - name: Generate documentation
+        run: |
+          bin/illuaminate doc-gen
+
+  lint:
+    name: Illuaminate Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup illuaminate
+        run: |
+          test -d bin || mkdir bin
+          test -f bin/illuaminate || wget -q -Obin/illuaminate https://squiddev.cc/illuaminate/linux-x86-64/illuaminate
+          chmod +x bin/illuaminate
+
+      - name: Lint Lua code
+        run: |
+          bin/illuaminate lint
