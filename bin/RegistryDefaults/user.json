@@ -1,1 +1,109 @@
-[]
+{
+  "folders": {
+    "Menu": {
+      "folders": {},
+      "values": {
+        "PinnedApps": {
+          "type": "table",
+          "value": "[{\"name\": \"Shell\", \"path\": \"/rom/programs/shell.lua\"}, {\"name\": \"Lua\", \"path\": \"/rom/programs/lua.lua\"}]"
+        }
+      }
+    },
+    "Appearance": {
+      "folders": {
+        "Window": {
+          "folders": {},
+          "values": {
+            "WindowUnfocused": {
+              "type": "number",
+              "value": "8"
+            },
+            "WindowFocused": {
+              "type": "number",
+              "value": "512"
+            },
+            "ControlButton": {
+              "type": "number",
+              "value": "8"
+            },
+            "CloseButton": {
+              "type": "number",
+              "value": "16384"
+            },
+            "TitlebarText": {
+              "type": "number",
+              "value": "1"
+            },
+            "ControlButtonText": {
+              "type": "number",
+              "value": "1"
+            },
+            "CloseButtonText": {
+              "type": "number",
+              "value": "1"
+            }
+          }
+        },
+        "Application": {
+          "folders": {},
+          "values": {
+            "ApplicationBackground": {
+              "type": "number",
+              "value": "1"
+            },
+            "ApplicationText": {
+              "type": "number",
+              "value": "128"
+            },
+            "ApplicationTextStrong": {
+              "type": "number",
+              "value": "32768"
+            }
+          }
+        },
+        "UserInterface": {
+          "folders": {
+            "Button": {
+              "folders": {},
+              "values": {
+                "Background": {
+                  "type": "number",
+                  "value": "256"
+                },
+                "Text": {
+                  "type": "number",
+                  "value": "32768"
+                },
+                "TextDisabled": {
+                  "type": "number",
+                  "value": "256"
+                },
+                "Clicking": {
+                  "type": "number",
+                  "value": "128"
+                },
+                "Focused": {
+                  "type": "number",
+                  "value": "8"
+                }
+              }
+            }
+          },
+          "values": {}
+        }
+      },
+      "values": {
+        "DesktopBackgroundColor": {
+          "type": "number",
+          "value": "256"
+        }
+      }
+    }
+  },
+  "values": {
+    "UserName": {
+      "type": "string",
+      "value": "User"
+    }
+  }
+}

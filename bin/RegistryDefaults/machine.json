@@ -1,52 +1,14 @@
 {
-  "folders": {
-    "Appearance": {
-      "folders": {},
-      "values": {
-        "BackgroundColor": {
-          "type": "number",
-          "value": "256"
-        },
-        "WindowUnfocused": {
-          "type": "number",
-          "value": "8"
-        },
-        "WindowFocused": {
-          "type": "number",
-          "value": "512"
-        },
-        "ControlButton": {
-          "type": "number",
-          "value": "8"
-        },
-        "CloseButton": {
-          "type": "number",
-          "value": "16384"
-        },
-        "TitlebarText": {
-          "type": "number",
-          "value": "1"
-        },
-        "ControlButtonText": {
-          "type": "number",
-          "value": "1"
-        },
-        "CloseButtonText": {
-          "type": "number",
-          "value": "1"
-        }
-      }
-    }
-  },
+  "folders": {},
   "values": {
     "RegistryVersion": {
       "type": "number",
-      "value": "2",
+      "value": "3",
       "overrideOnUpdate": true
     },
     "SystemVersionName": {
       "type": "string",
-      "value": "Alpha Testing - 8/4/2022",
+      "value": "Alpha Testing - 8/9/2022",
       "overrideOnUpdate": true
     },
     "SystemVersionNumber": {

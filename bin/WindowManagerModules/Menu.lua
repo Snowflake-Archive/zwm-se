@@ -40,15 +40,18 @@ function menu:new(logger, buffer)
   self.focusableEventManager:addButton(self.shutdownButton)
 
   self.focusableEventManager:inject(eventManager)
-  self.scroll = scrollbox:new(1, 1, 15, 10, term.current(), {y = true})
-
-  local t = self.scroll:getTerminal()
-    
-  t.setTextColor(colors.white)
-  t.setCursorPos(1, 1)
-  t.write("Menu")
+  self.scroll = scrollbox:new(1, 1, 15, 10, buffer, {y = true})
+  self:renderScrollbox()
 
   return o
+end
+
+function menu:renderScrollbox()
+  local t = self.scroll:getTerminal()
+  t.setBackgroundColor(colors.gray)
+  t.setTextColor(colors.white)
+  t.setCursorPos(1, 1)
+  t.write("Pinned Apps")
 end
 
 function menu:render(processes)
@@ -113,6 +116,8 @@ function menu:render(processes)
     self.searchInput:setVisible(true)
     self.searchInput:reposition(2, h - 2)
     self.shutdownButton:reposition(15, h - 2)
+    self.scroll:reposition(2, h - 13)
+    self.scroll:redraw()
   else
     self.shutdownButton:setVisible(false)
   end
