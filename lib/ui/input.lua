@@ -9,14 +9,15 @@ local input = {}
 --- Creates a new input object.
 -- @tparam number x The X position of the input.
 -- @tparam number y The Y position of the input.
+-- @tparam number w The width of the input.
 -- @tparam function onChange Fires when the content of the input changes.
 -- @tparam function onComplete Fires when the input is defocused. This will fire with a method to defocusization, either "return" or "defocus"
 -- @tparam[opt] string placeholder Text that will be rendered if the input is empty.
 -- @tparam[opt] boolean disabled Whether or not the input can be focused
 -- @tparam[opt] string default The default content of the input
--- @tparam[opt] boolean enabled Whether or not the input is enabled. Default is true, if this is false the input won't render, nor will it be visible. 
+-- @tparam[opt] boolean visible Whether or not the input is visible. Default is true, if this is false the input won't render, nor will it be visible. 
 -- @return Input The net input.
-function input:new(x, y, w, onChange, onComplete, placeholder, disabled, default, enabled)
+function input:new(x, y, w, onChange, onComplete, placeholder, disabled, default, visible)
   local o = {
     x = x,
     y = y,
@@ -29,7 +30,7 @@ function input:new(x, y, w, onChange, onComplete, placeholder, disabled, default
     displayStartAt = 0,
     disabled = disabled == true,
     isFocused = false,
-    enabled = enabled or true,
+    visible = visible or true,
   }
 
   setmetatable(o, self)
@@ -69,7 +70,7 @@ end
 --- Sets whether or not the input is focused.
 -- @tparam boolean focused Whether or not the input is focused.
 function input:setFocused(focused)
-  self.isFocused = focused == true
+  self.isFocused = focused
   self:render(true)
 end
 
@@ -89,7 +90,7 @@ end
 
 --- Renders an input.
 function input:render()
-  if self.enabled then
+  if self.visible then
     self.bgOnRender = term.getBackgroundColor()
     util.drawBorder(self.x - 1, self.y - 1, self.w + 4, 3, self.isFocused and colors.lightBlue or colors.lightGray, "1-box")
     term.setTextColor(colors.black)

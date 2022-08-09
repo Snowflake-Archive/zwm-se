@@ -1,13 +1,12 @@
 [X] Registry management
 [X] Event manager
 [ ] UI things
-    [ ] "List" layouts
     [ ] Menubars
-    [ ] Buttons
-    [ ] Inputs
-[ ] Window manager
+    [X] Buttons
+    [X] Inputs
+[X] Window manager
     [X] Basic window management features
-    [ ] Minimization
+    [X] Minimization
 [X] Menu bar
 [ ] Menu
 

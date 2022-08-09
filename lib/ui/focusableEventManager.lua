@@ -41,21 +41,21 @@ function focusableEventManager:check(e)
     local m, x, y = e[2], e[3], e[4]
     for _, v in pairs(self.objects) do
       if m == 1 then
-        if v.type == "button" and v.o.disabled == false then
+        if v.type == "button" and v.o.disabled == false and v.o.visible == true then
           if v.o.visible and v.o.renderedWidth and y == v.o.y and x >= v.o.x and x <= v.o.x + v.o.renderedWidth - 1 then        
             v.o:click(true)
           elseif v.o.isFocused then
             v.o.isFocused = false
             v.o:render(true)
           end
-        elseif v.type == "input" then
+        elseif v.type == "input" and v.o.disabled == false and v.o.visible == true then
           if x >= v.o.x and x <= v.o.x + v.o.w - 1 and v.o.y == y then
             v.o:setFocused(true)
-            v.o:render()
           elseif v.isFocused == true then
             v.o.onComplete(v.o.content, "defocus")
             v.o:setFocused(false) 
-            v.o:render()
+          else
+            v.o:setFocused(false) 
           end
         end
       end

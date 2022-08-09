@@ -198,7 +198,7 @@ xpcall(function()
               hideMaximize = true,
               title = "Error",
               env = {
-                errorText = "The requested path, " .. process .. ", does not exist."
+                errorText = "The requested path, " .. process .. ", does not exist.",
               }
             })
           end
@@ -211,7 +211,7 @@ xpcall(function()
                 wmProcessStopInfo = {
                   name = newProcess.title or "",
                   error = stop,
-                  traceback = trace
+                  traceback = trace,
                 }
               },
               isCentered = true,
@@ -325,11 +325,16 @@ xpcall(function()
         local cX, cY = term.getCursorPos()
 
         menu:render(processes)
+        local mX, mY = term.getCursorPos()
 
         term.setCursorPos(cX, cY)
 
-        if anyFocused == false then
+        if menu.isMenuVisible == false and anyFocused == false then
           term.setCursorBlink(false)
+        end
+
+        if menu.isMenuVisible == true then
+          term.setCursorPos(mX, mY)
         end
       end
     end,

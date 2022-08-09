@@ -32,6 +32,7 @@ end, function(content, type)
     _ENV.wm.killProcess(_ENV.wm.id)
   end
 end)
+
 path:setFocused(true)
 
 local function render()
@@ -55,4 +56,8 @@ focusableManager:addInput(path)
 focusableManager:inject(manager)
 render()
 
-events:listen()
+while true do
+  local e = {os.pullEvent()}
+  focusableManager:check(e)
+
+end
