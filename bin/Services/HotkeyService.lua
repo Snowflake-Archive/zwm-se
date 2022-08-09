@@ -37,15 +37,6 @@ local hotkeys = {
         title = "Lua",
       }, true)
     end,
-  },
-  {
-    name = "Error Test (CTRL+SHIFT+E)",
-    keys = {keys.leftCtrl, keys.leftShift, keys.e},
-    f = function()
-      _ENV.wm.addProcess("/bin/errort,est.lua", {
-        title = "ErrorTestAwooga"
-      }, true)
-    end,
   }
 }
 

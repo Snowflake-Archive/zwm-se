@@ -27,6 +27,8 @@ function events:redirectEventsForMouse(p, e, idx)
           elseif p.hideMaximize == true then
             p.minimized = true
             p.focused = false
+            return true
+
           else
             p.maxamized = not p.maxamized
 
@@ -48,6 +50,8 @@ function events:redirectEventsForMouse(p, e, idx)
               p.y = p.y_orig
               p.window.reposition(p.x, p.y + 1, p.w, p.h - 1)
             end
+
+            return true
           end
         elseif e[3] >= p.x + p.w - 9 and e[3] <= p.x + p.w - 5 then
           if p.hideMinimize == true or p.hideMaxamize then
@@ -55,6 +59,7 @@ function events:redirectEventsForMouse(p, e, idx)
           else
             p.minimized = true
             p.focused = false
+            return true
           end
         elseif p.maxamized == false then
           self.windowDraggingState = {
@@ -137,6 +142,8 @@ function events:fire(e, processes, displayOrder)
   w, h = self.buffer.getSize()
   local didHitMouse = false
   local gotFocusTarget = false
+  local redrawAll = false
+  local redrawWindows = {}
 
   -- Display order prep
   local onCompleteDisplayOrder = {}
@@ -163,6 +170,7 @@ function events:fire(e, processes, displayOrder)
   elseif e[1] == "mouse_drag" then
     if self.windowDraggingState or self.windowResizeState then
       self:windowDrag(e, processes, displayOrder)
+      redrawAll = true
     end
   end
 
@@ -184,7 +192,7 @@ function events:fire(e, processes, displayOrder)
       elseif v.focused == true then
         if e[1]:match("^mouse_%a+") then
           if e[3] >= v.x and e[3] <= v.x + v.w - 1 and e[4] >= v.y and e[4] <= v.y + v.h - 1 then
-            self:redirectEventsForMouse(v, e, o, i)
+            redrawAll = self:redirectEventsForMouse(v, e, o, i) or redrawAll
             didHitMouse = true
           elseif e[2] == 1 and e[3] == v.x + v.w and e[4] == v.y + v.h and v.isResizeable == true and
             v.maxamized == false then
@@ -221,6 +229,7 @@ function events:fire(e, processes, displayOrder)
             didHitMouse = true
             gotFocusTarget = true
 
+            table.insert(redrawWindows, i)
             table.remove(onCompleteDisplayOrder, i)
             table.insert(onCompleteDisplayOrder, 1, "")
             onCompleteDisplayOrder[1] = o
@@ -241,15 +250,16 @@ function events:fire(e, processes, displayOrder)
   term.redirect(self.buffer)
 
   if didHitMouse == false and e[1]:match("^mouse_%a+") and e[4] ~= h then
-    for _, v in pairs(processes) do
+    for i, v in pairs(processes) do
       if v.focused == true then
+        table.insert(redrawWindows, i)
         v.focused = false
         break
       end
     end
   end
 
-  return onCompleteDisplayOrder
+  return onCompleteDisplayOrder, redrawAll, redrawWindows
 end
 
 return events

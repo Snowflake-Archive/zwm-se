@@ -1,6 +1,8 @@
 local util = require(".lib.util")
 local input = require(".lib.ui.input")
+local button = require(".lib.ui.button")
 local eventManager = require(".lib.events")
+local scrollbox = require(".lib.ui.scrollbox")
 local focusableEventManager = require(".lib.ui.focusableEventManager")
 
 local menu = {}
@@ -17,29 +19,48 @@ function menu:new(logger, buffer)
   self.processPositions = {}
   self.isMenuVisible = false
   self.searchContent = ""
+  self.term = term.current()
 
   self.eventManager = eventManager:new()
   self.focusableEventManager = focusableEventManager:new()
 
-  self.searchInput = input:new(1, 1, 10, function(data)
+  self.searchInput = input:new(1, 1, 9, function(data)
     self.searchContent = data
   end, function() end, "Search...", nil, nil, false)
 
+  self.shutdownButton = button:new(1, 1, "O", function()
+    os.reboot()
+  end, nil, false, true, {
+    background = colors.red,
+    clicking = colors.pink,
+    text = colors.white
+  })
+
   self.focusableEventManager:addInput(self.searchInput)
+  self.focusableEventManager:addButton(self.shutdownButton)
 
   self.focusableEventManager:inject(eventManager)
+  self.scroll = scrollbox:new(1, 1, 15, 10, term.current(), {y = true})
+
+  local t = self.scroll:getTerminal()
+    
+  t.setTextColor(colors.white)
+  t.setCursorPos(1, 1)
+  t.write("Menu")
 
   return o
 end
 
 function menu:render(processes)
+  if processes then
+    self.processes = processes
+  end
+
   local oldX, oldY = term.getCursorPos()
   local oldColor = term.getTextColor()
   term.redirect(self.buffer)
   local w, h = term.getSize()
   term.setCursorPos(1, h)
-
-  self.searchInput:reposition(2, h - 2)
 
   term.setTextColor(colors.white)
   term.setBackgroundColor(colors.gray)
@@ -64,7 +85,7 @@ function menu:render(processes)
   self.w = w
   self.h = h
 
-  for i, v in pairs(processes) do
+  for i, v in pairs(self.processes) do
     if v.isService ~= true then
       local x = term.getCursorPos()
       if v.focused then
@@ -88,7 +109,12 @@ function menu:render(processes)
 
   if self.isMenuVisible then
     paintutils.drawFilledBox(1, h - 14, 16, h - 1, colors.gray)
-    self.searchInput:render()
+    self.shutdownButton:setVisible(true)
+    self.searchInput:setVisible(true)
+    self.searchInput:reposition(2, h - 2)
+    self.shutdownButton:reposition(15, h - 2)
+  else
+    self.shutdownButton:setVisible(false)
   end
 
   term.setTextColor(oldColor)
@@ -97,6 +123,7 @@ end
 
 function menu:fire(e)
   self.eventManager:check(e)
+  local oldIsMenuVisible = self.isMenuVisible
 
   if e[1] == "mouse_click" then
     local m, x, y = e[2], e[3], e[4]
@@ -112,6 +139,8 @@ function menu:fire(e)
 
         if x >= 1 and x <= 3 then
           self.searchInput:setFocused(true)
+          self.searchContent = ""
+          self.searchInput:setContent("")
           self.isMenuVisible = not self.isMenuVisible
         else
           self.searchInput:setFocused(false)
@@ -126,6 +155,12 @@ function menu:fire(e)
       self.isMenuVisible = false
     end
   end
+
+  if oldIsMenuVisible ~= self.isMenuVisible then
+    self:render()
+  end
+
+  return oldIsMenuVisible ~= self.isMenuVisible
 end
 
 return menu

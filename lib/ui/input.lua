@@ -65,6 +65,7 @@ end
 -- @tparam boolean visible Whether or not the input is disabled.
 function input:setVisible(visible)
   self.visible = visible == true
+  self:render(true)
 end
 
 --- Sets whether or not the input is focused.

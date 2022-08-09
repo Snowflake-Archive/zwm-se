@@ -12,8 +12,10 @@ local button = {}
 -- @tparam function callback The function that is ran when the button is clicked.
 -- @tparam[opt] boolean disabled If this is true, the button will be grayed out and not be selectable.
 -- @tparam[opt] boolean visible If this is false, the button will not be rendered, nor selectable.
+-- @tparam[opt] boolean disablePadding If this is true, the text of the button will be its actual text, and not padded.
+-- @tparam[opt] table colors A table for colors, background, clicking, focused, text, and textDisabled 
 -- @return Button The new button.
-function button:new(x, y, text, callback, disabled, visible)
+function button:new(x, y, text, callback, disabled, visible, disablePadding, colors)
   local o = {
     x = x,
     y = y,
@@ -22,7 +24,9 @@ function button:new(x, y, text, callback, disabled, visible)
     disabled = disabled == true,
     isFocused = false,
     isBeingClicked = false,
-    visible = visible or true,
+    visible = visible ~= false,
+    disablePadding = disablePadding == true,
+    colors = colors or {},
   }
 
   setmetatable(o, self)
@@ -57,13 +61,19 @@ end
 -- @tparam boolean visible Whether or not the button is disabled.
 function button:setVisible(visible)
   self.visible = visible == true
+  self:render(true)
 end
 
 --- Sets whether or not the button is focused.
 -- @tparam boolean focused Whether or not the button is focused.
 function button:setFocused(focused)
-  self.isFocused = focused == true
-  self:render(true)
+  local oldValue = self.isFocused
+  local newValue = focused == true
+
+  if oldValue ~= newValue then
+    self.isFocused = focused == true
+    self:render(true)
+  end
 end
 
 --- Renders the button.
@@ -72,28 +82,35 @@ function button:render(useBgRender)
   if self.visible == true then
     local oX, oY = term.getCursorPos()
 
+    local displayStr = self.text
+    
+    if self.disablePadding == false then
+      displayStr = " " .. displayStr .. " "
+    end
+
     if useBgRender and self.bgOnRender then
       term.setBackgroundColor(self.bgOnRender)
     else
       self.bgOnRender = term.getBackgroundColor()
     end
 
-    local color = colors.lightGray
+    local color = self.colors.background or colors.lightGray
 
     if self.isBeingClicked == true then
-      color = colors.gray
+      color = self.colors.clicking or colors.gray
     elseif self.isFocused == true then
-      color = colors.lightBlue
+      color = self.colors.focused or colors.lightBlue
     end
 
-    util.drawBorder(self.x - 1, self.y - 1, self.text:len() + 4, 3, color, "1-box")
+    util.drawBorder(self.x - 1, self.y - 1, #displayStr + 2, 3, color, "1-box")
 
     term.setCursorPos(self.x, self.y)
-    term.setBackgroundColor(colors.lightGray)
-    term.setTextColor(self.disabled and colors.gray or colors.black)
-    term.write((" %s "):format(self.text))
+    term.setBackgroundColor(self.colors.background or colors.lightGray)
+    term.setTextColor(self.disabled and (self.colors.textDisabled or colors.gray) or (self.colors.text or colors.black))
+    
+    term.write(displayStr)
 
-    self.renderedWidth = self.text:len() + 2
+    self.renderedWidth = #displayStr
 
     term.setBackgroundColor(self.bgOnRender)
     term.setCursorPos(oX, oY)

@@ -42,3 +42,4 @@ luac.out
 *.log
 pain.lua
 .painapi
+cloud.lua

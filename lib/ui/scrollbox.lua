@@ -147,6 +147,11 @@ function scrollbox:getTerminal()
   return self.sbterm
 end
 
+--- Gets the scrollbox's window.
+function scrollbox:getWindow()
+  return self.scrollWin
+end
+
 --- Gets the scroll position of a scrollbox.
 -- @return The X and Y scroll position.
 function scrollbox:getScroll()

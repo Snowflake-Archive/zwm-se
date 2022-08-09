@@ -21,6 +21,7 @@ local menu = require(".bin.WindowManagerModules.Menu"):new(logger, buffer)
 local wm = {}
 
 local nextProcessId = 0
+local nextRedraw = false
 
 xpcall(function()
   -- Functions
@@ -45,7 +46,7 @@ xpcall(function()
       end
     end
 
-    windowRenderer:renderProcesses(processes, displayOrder)
+    nextRedraw = true
   end
 
   --- Gets all running processes.
@@ -107,6 +108,8 @@ xpcall(function()
     end
 
     if options.isService ~= true then
+      nextRedraw = true
+
       if options.isCentered then
         options.x = math.floor((w / 2 - (options.w or 25) / 2) + 0.5)
         options.y = math.floor((h / 2 - (options.h or 10) / 2) + 0.5)
@@ -245,6 +248,7 @@ xpcall(function()
       -- Event loop
       while true do
         local e = {os.pullEvent()}
+        local needsRedraw = false
 
         -- == Events == --
 
@@ -253,6 +257,7 @@ xpcall(function()
           w, h = nW, nH
           buffer.reposition(1, 1, w, h)
           logger:info("Resized to %d x %d", w, h)
+          needsRedraw = true
         elseif e[1] == "launchProgram" then
           -- e[2]: id for message
           -- e[3]: path/func
@@ -260,6 +265,7 @@ xpcall(function()
           -- e[5]: focused
           local id = wm.addProcess(e[3], e[4], e[5])
           table.insert(displayOrder, 1, id)
+          needsRedraw = true
 
           for _, v in pairs(processes) do
             if v.window then
@@ -289,15 +295,18 @@ xpcall(function()
           table.remove(displayOrder, 1)
           table.insert(displayOrder, 1, "")
           displayOrder[1] = e[2]
+          needsRedraw = true
         elseif e[1] == "killProcess" then
           -- e[2]: id of process to kill
           wm.killProcess(e[2])
+          needsRedraw = true
         end
 
         -- Dead Process Checking
         for i, v in pairs(processes) do
           if coroutine.status(v.coroutine) == "dead" then
             wm.killProcess(i)
+            needsRedraw = true
           end
       
           if v.isService and v.coroutine then
@@ -305,8 +314,11 @@ xpcall(function()
           end
         end
 
-        displayOrder = windowEvents:fire(e, processes, displayOrder)
-        menu:fire(e)
+        local displayOrder2, needsRedrawFromWinEvent, redrawWindows = windowEvents:fire(e, processes, displayOrder)
+        local needsRedrawFromMenu = menu:fire(e)
+
+        displayOrder = displayOrder2
+        needsRedraw = needsRedraw or needsRedrawFromMenu or needsRedrawFromWinEvent or nextRedraw
 
         -- == Rendering == --
 
@@ -317,25 +329,33 @@ xpcall(function()
           end
         end
 
-        buffer.setBackgroundColor(registry.readKey("machine", "Appearance.BackgroundColor"))
-        buffer.clear()
+        if needsRedraw then
+          buffer.setBackgroundColor(registry.readKey("machine", "Appearance.BackgroundColor"))
+          buffer.clear()
 
-        ensureDisplayOrder()
-        windowRenderer:renderProcesses(processes, displayOrder)
-        local cX, cY = term.getCursorPos()
+          ensureDisplayOrder()
+          windowRenderer:renderProcesses(processes, displayOrder)
+          local cX, cY = term.getCursorPos()
 
-        menu:render(processes)
-        local mX, mY = term.getCursorPos()
+          menu:render(processes)
+          local mX, mY = term.getCursorPos()
 
-        term.setCursorPos(cX, cY)
+          term.setCursorPos(cX, cY)
 
-        if menu.isMenuVisible == false and anyFocused == false then
-          term.setCursorBlink(false)
+          if menu.isMenuVisible == false and anyFocused == false then
+            term.setCursorBlink(false)
+          end
+
+          if menu.isMenuVisible == true then
+            term.setCursorPos(mX, mY)
+          end
+        elseif #redrawWindows > 0 then
+          paintutils.drawFilledBox(1, 1, w, h - 1, colors.lightGray)
+          windowRenderer:renderProcesses(processes, displayOrder)
         end
 
-        if menu.isMenuVisible == true then
-          term.setCursorPos(mX, mY)
-        end
+        nextRedraw = false
+      
       end
     end,
     function()

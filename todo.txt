@@ -9,5 +9,11 @@
     [X] Minimization
 [X] Menu bar
 [ ] Menu
+    [X] Buttons and inputs
+    [ ] Shutdown menu
+    [ ] Scroll area
+    [ ] Searching
 
 bugs:
+- clock does not update (only on full or menu re-render)
+- process windows will sometimes render over the menu (can be fixed by re-rendering menubar)

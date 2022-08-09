@@ -51,7 +51,7 @@ function renderer:renderProcess(p)
 
       if p.hideMaximize == false then
         term.setCursorPos(nextButtonRenderAt, p.y)
-        term.write(" " .. (p.isMaxamized and "-" or "+") .. " ")
+        term.write(" " .. (p.maxamized and "-" or "+") .. " ")
         nextButtonRenderAt = nextButtonRenderAt - 3
       end
 
@@ -61,64 +61,66 @@ function renderer:renderProcess(p)
         nextButtonRenderAt = nextButtonRenderAt - 3
       end
 
-      -- Left Edge
-      if p.x >= 2 then
-        for i = 1, p.h do
-          if p.y + i - 1 <= h then
-            local _, _, lineB = self.buffer.getLine(p.y + i - 1)
+      if not p.maxamized then
+        -- Left Edge
+        if p.x >= 2 then
+          for i = 1, p.h do
+            if p.y + i - 1 <= h - 1 then
+              local _, _, lineB = self.buffer.getLine(p.y + i - 1)
 
-            local use = util.fromBlit(util.selectXfromBlit(p.x - 1, lineB))
+              local use = util.fromBlit(util.selectXfromBlit(p.x - 1, lineB))
 
-            if self.backgroundLayers[p.y + i - 1] and self.backgroundLayers[p.y + i - 1][p.x] then
-              use = self.backgroundLayers[p.y + i - 1][p.x]
-            else
+              if self.backgroundLayers[p.y + i - 1] and self.backgroundLayers[p.y + i - 1][p.x] then
+                use = self.backgroundLayers[p.y + i - 1][p.x]
+              else
+                if self.backgroundLayers[p.y + i - 1] == nil then
+                  self.backgroundLayers[p.y + i - 1] = {}
+                end
+
+                self.backgroundLayers[p.y + i - 1][p.x] = use
+              end
+              
+              util.drawPixelCharacter(p.x - 1, p.y + i - 1, false, true, false, true, false, true, color, use)
+            end
+          end
+
+        
+          if p.y + p.h <= h - 1 then
+            local _, _, line2 = self.buffer.getLine(p.y + p.h)
+            util.drawPixelCharacter(p.x - 1, p.y + p.h, false, true, false, false, false, false, color, util.fromBlit(util.selectXfromBlit(p.x - 1, line2)))
+          end
+        end
+
+        -- Bottom Edge
+        if p.y + p.h <= h - 1 then
+          local _, _, line2 = self.buffer.getLine(p.y + p.h)
+          for i = 1, p.w do
+            if p.x + i - 1 <= w and p.x + i - 1 >= 1 then
+              local bg = util.fromBlit(util.selectXfromBlit(p.x + i - 1, line2))
+              util.drawPixelCharacter(p.x + i - 1, p.y + p.h, true, true, false, false, false, false, color, bg)
+            end
+          end
+
+          
+          if p.x + p.w <= w then
+            util.drawPixelCharacter(p.x + p.w, p.y + p.h, true, false, false, false, false, false, color, util.fromBlit(util.selectXfromBlit(p.x + p.w, line2)))
+          end
+        end
+
+        -- Right Edge
+        if p.x + p.w <= w then
+          for i = 1, p.h do
+            if p.y + i - 1 <= h - 1 then
+              local _, _, line3 = self.buffer.getLine(p.y + i - 1)
+              local bg = util.fromBlit(util.selectXfromBlit(p.x + p.w, line3))
+              util.drawPixelCharacter(p.x + p.w, p.y + i - 1, true, false, true, false, true, false, color, bg)
+
               if self.backgroundLayers[p.y + i - 1] == nil then
                 self.backgroundLayers[p.y + i - 1] = {}
               end
 
-              self.backgroundLayers[p.y + i - 1][p.x] = use
+              self.backgroundLayers[p.y + i - 1][p.x + p.w + 1] = color
             end
-            
-            util.drawPixelCharacter(p.x - 1, p.y + i - 1, false, true, false, true, false, true, color, use)
-          end
-        end
-
-       
-        if p.y + p.h <= h then
-          local _, _, line2 = self.buffer.getLine(p.y + p.h)
-          util.drawPixelCharacter(p.x - 1, p.y + p.h, false, true, false, false, false, false, color, util.fromBlit(util.selectXfromBlit(p.x - 1, line2)))
-        end
-      end
-
-      -- Bottom Edge
-      if p.y + p.h <= h then
-        local _, _, line2 = self.buffer.getLine(p.y + p.h)
-        for i = 1, p.w do
-          if p.x + i - 1 <= w and p.x + i - 1 >= 1 then
-            local bg = util.fromBlit(util.selectXfromBlit(p.x + i - 1, line2))
-            util.drawPixelCharacter(p.x + i - 1, p.y + p.h, true, true, false, false, false, false, color, bg)
-          end
-        end
-
-        
-        if p.x + p.w <= w then
-          util.drawPixelCharacter(p.x + p.w, p.y + p.h, true, false, false, false, false, false, color, util.fromBlit(util.selectXfromBlit(p.x + p.w, line2)))
-        end
-      end
-
-      -- Right Edge
-      if p.x + p.w <= w then
-        for i = 1, p.h do
-          if p.y + i - 1 <= h then
-            local _, _, line3 = self.buffer.getLine(p.y + i - 1)
-            local bg = util.fromBlit(util.selectXfromBlit(p.x + p.w, line3))
-            util.drawPixelCharacter(p.x + p.w, p.y + i - 1, true, false, true, false, true, false, color, bg)
-
-            if self.backgroundLayers[p.y + i - 1] == nil then
-              self.backgroundLayers[p.y + i - 1] = {}
-            end
-
-            self.backgroundLayers[p.y + i - 1][p.x + p.w + 1] = color
           end
         end
       end
