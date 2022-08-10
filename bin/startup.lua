@@ -5,7 +5,6 @@ local file = require(".lib.utils.file")
 print("Checking for registry updates...")
 
 local function updateRegistry(name)
-  local path = ("/bin/RegistryDefaults/%s.json"):format(name)
   local save = ("/bin/Registry/%s.json"):format(name)
 
   if fs.exists(save) then

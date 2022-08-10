@@ -5,29 +5,96 @@ local eventManager = require(".lib.events")
 local scrollbox = require(".lib.ui.scrollbox")
 local focusableEventManager = require(".lib.ui.focusableEventManager")
 local RegistryReader = require(".lib.registry.Reader")
+local strings = require("cc.strings")
 
 local menu = {}
 
+local searchIgnore = {
+  "bin/Assets",
+  "bin/Prompts",
+  "bin/Registry",
+  "bin/ReigstryDefaults",
+  "bin/Services",
+  "bin/WindowManagerModules",
+  "bin/processStopped.lua",
+  "bin/startup.lua",
+  "bin/wm.lua",
+  "lib",
+  "rom/apis",
+  "rom/modules",
+  "rom/programs/advanced",
+  "rom/programs/command",
+  "rom/programs/fun/advanced/paint.lua",
+  "rom/programs/fun/speaker.lua",
+  "rom/programs/http",
+  "rom/programs/pocket/equip.lua",
+  "rom/programs/pocket/unequip.lua",
+  "rom/programs/rednet",
+  "rom/programs/turtle",
+  "rom/programs/about.lua",
+  "rom/programs/alias.lua",
+  "rom/programs/apis.lua",
+  "rom/programs/attach.lua",
+  "rom/programs/cd.lua",
+  "rom/programs/clear.lua",
+  "rom/programs/config.lua",
+  "rom/programs/copy.lua",
+  "rom/programs/delete.lua",
+  "rom/programs/detach.lua",
+  "rom/programs/drive.lua",
+  "rom/programs/edit.lua",
+  "rom/programs/eject.lua",
+  "rom/programs/env.lua",
+  "rom/programs/exit.lua",
+  "rom/programs/gps.lua",
+  "rom/programs/help.lua",
+  "rom/programs/id.lua",
+  "rom/programs/label.lua",
+  "rom/programs/list.lua",
+  "rom/programs/mkdir.lua",
+  "rom/programs/monitor.lua",
+  "rom/programs/motd.lua",
+  "rom/programs/mount.lua",
+  "rom/programs/move.lua",
+  "rom/programs/peripherals.lua",
+  "rom/programs/programs.lua",
+  "rom/programs/reboot.lua",
+  "rom/programs/redstone.lua",
+  "rom/programs/rename.lua",
+  "rom/programs/screenfetch.lua",
+  "rom/programs/set.lua",
+  "rom/programs/shutdown.lua",
+  "rom/programs/time.lua",
+  "rom/programs/type.lua",
+  "rom/programs/unmount.lua", 
+  "rom/autorun",
+  "rom/motd.txt",
+  "rom/startup.lua",
+}
+
 --- Creates a window renderr manager.
 -- @return WindowRenderer The window renderer
-function menu:new(logger, buffer)
+function menu:new(logger, buffer, wm)
   local o = {}
   setmetatable(o, self)
   self.__index = self
 
   self.buffer = buffer
+  self.wm = wm
   self.logger = logger
   self.processPositions = {}
   self.isMenuVisible = false
   self.searchContent = ""
   self.term = term.current()
   self.registry = RegistryReader:new("user")
+  self.searchLaunch = {}
 
   self.eventManager = eventManager:new()
   self.focusableEventManager = focusableEventManager:new()
 
   self.searchInput = input:new(1, 1, 9, function(data)
     self.searchContent = data
+    self:renderScrollbox()
   end, function() end, "Search...", nil, nil, false)
 
   self.shutdownButton = button:new(1, 1, "O", function()
@@ -41,8 +108,9 @@ function menu:new(logger, buffer)
   self.focusableEventManager:addInput(self.searchInput)
   self.focusableEventManager:addButton(self.shutdownButton)
 
-  self.focusableEventManager:inject(eventManager)
-  self.scroll = scrollbox:new(1, 1, 15, 10, buffer, {y = true})
+  self.focusableEventManager:inject(self.eventManager)
+  self.scroll = scrollbox:new(1, 1, 15, 10, buffer, {y = true}, false)
+  self.scroll:addToEventManager(self.eventManager)
   self:renderScrollbox()
 
   return o
@@ -50,10 +118,70 @@ end
 
 function menu:renderScrollbox()
   local t = self.scroll:getTerminal()
-  t.setBackgroundColor(colors.gray)
-  t.setTextColor(colors.white)
-  t.setCursorPos(1, 1)
-  t.write("Pinned Apps")
+
+  if #self.searchContent > 0 then
+    t.setBackgroundColor(colors.gray)
+    t.setTextColor(colors.white)
+    t.clear()
+    
+    local programs = {}
+
+    local function search(dir, deep)
+      local items = fs.list(dir)
+
+      if deep > 5 then
+        return
+      end
+
+      for _, item in pairs(items) do
+        if not util.tableContains(searchIgnore, fs.combine(dir, item)) then
+          if fs.isDir(fs.combine(dir, item)) then
+            search(fs.combine(dir, item), deep + 1)
+          elseif item:find(self.searchContent) and item:match("%.lua$") then
+            programs[#programs + 1] = {
+              dir = dir,
+              path = fs.combine(dir, item),
+            }
+          end
+        end
+      end
+    end
+
+    search("/", 0)
+
+    t.setCursorPos(1, 1)
+    t.write(("%d results"):format(#programs))
+
+    self.searchLaunch = {}
+
+    for i, v in pairs(programs) do
+      t.setCursorPos(1, i * 3)
+      t.setTextColor(colors.white)
+      t.write(strings.ensure_width(fs.getName(v.path), 14))
+      t.setCursorPos(1, i * 3 + 1)
+      t.setTextColor(colors.lightGray)
+      t.write(strings.ensure_width(v.dir, 14))
+      self.searchLaunch[#self.searchLaunch + 1] = {
+        y = i * 3,
+        path = v,
+      }
+    end
+  else
+    t.setBackgroundColor(colors.gray)
+    t.setTextColor(colors.white)
+    t.clear()
+    t.setCursorPos(1, 1)
+    t.write("Pinned Apps")
+    t.setCursorPos(1, 10)
+
+    for i, v in pairs(self.registry:get("Menu.PinnedApps")) do
+      t.setCursorPos(1, 1 + i)
+      t.setTextColor(colors.white)
+      t.write("\7 ")
+      t.setTextColor(colors.lightBlue)
+      t.write(v.name)
+    end
+  end
 end
 
 function menu:render(processes)
@@ -119,6 +247,7 @@ function menu:render(processes)
     -- Make everything visible
     self.shutdownButton:setVisible(true)
     self.searchInput:setVisible(true)
+    self.scroll:setVisible(true)
   
     -- Move items to desired positions
     self.searchInput:reposition(2, h - 2)
@@ -141,7 +270,20 @@ function menu:fire(e)
   if e[1] == "mouse_click" then
     local m, x, y = e[2], e[3], e[4]
     if self.w and self.h and self.isMenuVisible and x >= 1 and x <= 16 and y >= self.h - 14 and y <= self.h - 1 then
-      --"ok"
+      if x >= 2 and x <= 14 and y >= self.h - 13 and y <= self.h - 5 then
+        local _, sY = self.scroll:getScroll()
+
+        if self.searchContent ~= "" then
+          
+        else
+          for i, v in pairs(self.registry:get("Menu.PinnedApps")) do
+            if x >= 4 and x <= 3 + #v.name and y == self.h - 13 + sY + i - 1 then
+              self.wm.addProcess(v.path, {title = v.name}, true)
+              self.isMenuVisible = false
+            end
+          end
+        end
+      end
     elseif m == 1 then
       if y == self.h then
         for _, v in pairs(self.processPositions) do
@@ -170,6 +312,12 @@ function menu:fire(e)
   end
 
   if oldIsMenuVisible ~= self.isMenuVisible then
+    self.scroll:setVisible(self.isMenuVisible)
+
+    if self.isMenuVisible then
+      self:renderScrollbox()
+    end
+
     self:render()
   end
 

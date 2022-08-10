@@ -142,8 +142,8 @@ function input:fire(e)
       self.displayStartAt = self.displayStartAt + 1
     end
 
-    self:render()
     self.onChange(self.content)
+    self:render()
   elseif e[1] == "key" then
     local k = e[2]
 
@@ -158,8 +158,8 @@ function input:fire(e)
           self.displayStartAt = self.displayStartAt - 1
         end
       end
-      self:render()
       self.onChange(self.content)
+      self:render()
     elseif k == keys.enter then
       self.onComplete(self.content, "return")
       self.isFocused = false

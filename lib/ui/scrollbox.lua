@@ -10,8 +10,9 @@ local scrollbox = {}
 -- @tparam number h The height of the scrollbox frame.
 -- @tparam table parent The parent term of the scrollbox window.
 -- @tparam[opt] table renderScrollbars A table containing an X and Y paramater, if either is true, a scrollbar will be rendered for that axis.
+-- @tparam[opt] boolean visible If false, the scrollbox will not be rendered. 
 -- @return Scrollbox The created scrollbox instance.
-function scrollbox:new(x, y, w, h, parent, renderScrollbars)
+function scrollbox:new(x, y, w, h, parent, renderScrollbars, visible)
   local newW, newH = w, h
 
   if renderScrollbars then
@@ -23,7 +24,7 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars)
     end
   end
 
-  local scrollWin = window.create(parent, x, y, newW, newH)
+  local scrollWin = window.create(parent, x, y, newW, newH, visible ~= false)
 
   local o = {
     x = x,
@@ -38,7 +39,11 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars)
     doRenderScrollbars = renderScrollbars,
     parent = parent,
     items = {},
+    visible = visible ~= false,
   }
+
+  setmetatable(o, self)
+  self.__index = self
 
   local function renderScrollbars()
     if o.doRenderScrollbars.y and o.maxHeight > o.h then
@@ -64,15 +69,17 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars)
   end
 
   local function redraw()
-    local oldX, oldY = scrollWin.getCursorPos()
-    local sX, sY = o.scrollX, o.scrollY
-    scrollWin.clear()
-    for _, v in pairs(o.items) do
-      scrollWin.setCursorPos(v.x + sX - 1, v.y + sY - 1)
-      scrollWin.blit(v.text, v.foreground, v.background)
+    if o.visible then
+      local oldX, oldY = scrollWin.getCursorPos()
+      local sX, sY = o.scrollX, o.scrollY
+      scrollWin.clear()
+      for _, v in pairs(o.items) do
+        scrollWin.setCursorPos(v.x + sX - 1, v.y + sY - 1)
+        scrollWin.blit(v.text, v.foreground, v.background)
+      end
+      scrollWin.setCursorPos(oldX, oldY)
+      renderScrollbars()
     end
-    scrollWin.setCursorPos(oldX, oldY)
-    renderScrollbars()
   end 
 
   local function blit(text, foreground, background)
@@ -80,6 +87,7 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars)
     o.maxWidth = math.max(o.maxWidth, cx + #text)
     o.maxHeight = math.max(o.maxHeight, cy)
     o.items[#o.items + 1] = {text = text, x = cx, y = cy, foreground = foreground, background = background}
+    scrollWin.setCursorPos(cx + #text, cy)
     redraw()
   end
   
@@ -131,9 +139,8 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars)
     redraw = redraw,
   }
 
-  setmetatable(o, self)
   self.sbterm = sbterm
-  self.__index = self
+  
   return o
 end
 
@@ -156,6 +163,13 @@ end
 -- @return The X and Y scroll position.
 function scrollbox:getScroll()
   return self.scrollX, self.scrollY
+end
+
+--- Sets whether or not the scrollbox is visible.
+-- @tparam boolean value If true, the scrollbox will be visible.
+function scrollbox:setVisible(value)
+  self.scrollWin.setVisible(value)
+  self.visible = value
 end
 
 --- Repositions the scrollbox.
@@ -218,11 +232,13 @@ function scrollbox:addToEventManager(eventManager)
   end
 
   eventManager:addListener("mouse_scroll", function(...)
-    self:onMouseScroll(...)
+    if self.visible then
+      self:onMouseScroll(...)
+    end
   end)
 
   eventManager:addListener("mouse_click", function(m, x, y)
-    if self.doRenderScrollbars.y then
+    if self.visible and self.doRenderScrollbars.y then
       if m == 1 and x == self.x + self.w - 1 and y == self.y then
         self:ensureScroll(-1)
       elseif m == 1 and x == self.x + self.w - 1 and y == self.y + self.h - 1 then
@@ -234,7 +250,7 @@ function scrollbox:addToEventManager(eventManager)
   end)
 
   eventManager:addListener("mouse_drag", function(m, x, y)
-    if self.doRenderScrollbars.y then
+    if self.visible and self.doRenderScrollbars.y then
       if m == 1 and x == self.x + self.w - 1 and y >= self.y + 1 and y <= self.y + self.h - 2 then
         onBarScroll(y)
       end

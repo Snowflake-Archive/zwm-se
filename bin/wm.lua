@@ -12,15 +12,15 @@ local buffer = window.create(term.current(), 1, 1, w, h)
 local processes = {}
 local displayOrder = {}
 
-local windowRenderer = require(".bin.WindowManagerModules.WindowRenderer"):new(logger, buffer, displayOrder, processes)
-local windowEvents = require(".bin.WindowManagerModules.WindowEvents"):new(logger, buffer)
-local menu = require(".bin.WindowManagerModules.Menu"):new(logger, buffer)
-
-local userRegistry = RegistryReader:new("user")
-
 --- The window manager and it's functions.
 -- @module[kind=core] WindowManager
 local wm = {}
+
+local windowRenderer = require(".bin.WindowManagerModules.WindowRenderer"):new(logger, buffer, displayOrder, processes)
+local windowEvents = require(".bin.WindowManagerModules.WindowEvents"):new(logger, buffer)
+local menu = require(".bin.WindowManagerModules.Menu"):new(logger, buffer, wm)
+
+local userRegistry = RegistryReader:new("user")
 
 local nextProcessId = 0
 local nextRedraw = false
@@ -236,6 +236,25 @@ xpcall(function()
     return nextProcessId - 1
   end
 
+  function wm.reloadModules()
+    logger:info("Reloaded wm modules")
+    windowRenderer = require(".bin.WindowManagerModules.WindowRenderer"):new(logger, buffer, displayOrder, processes)
+    windowEvents = require(".bin.WindowManagerModules.WindowEvents"):new(logger, buffer)
+    menu = require(".bin.WindowManagerModules.Menu"):new(logger, buffer, wm)    
+    wm.addProcess("/bin/Prompts/Info.lua", {
+      isCentered = true,
+      w = 32,
+      h = 9,
+      hideMinimize = true,
+      hideMaximize = true,
+      title = "Info",
+      env = {
+        infoText = "Window manager modules reloaded successfully!",
+      },
+    }, true)
+    nextRedraw = true     
+  end
+
   -- Begin services
   wm.addProcess("/bin/Services/ServiceWorker.lua", {isService = true})
 
@@ -296,6 +315,7 @@ xpcall(function()
           -- e[2]: id of process to kill
           wm.killProcess(e[2])
           needsRedraw = true
+
         end
 
         -- Dead Process Checking

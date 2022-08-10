@@ -5,8 +5,8 @@ local _, h = term.getSize()
 
 local hotkeys = {
   {
-    name = "Open Run Menu (CTRL+SHIFT+R)",
-    keys = {keys.leftCtrl, keys.leftShift, keys.r},
+    name = "Open Run Menu (CTRL+R)",
+    keys = {keys.leftCtrl, keys.r},
     f = function()
       _ENV.wm.addProcess("/bin/run.lua", {
         w = 27,
@@ -36,6 +36,13 @@ local hotkeys = {
       _ENV.wm.addProcess("/rom/programs/lua.lua", {
         title = "Lua",
       }, true)
+    end,
+  },
+  {
+    name = "Reload Window Manager Modules (CTRL+SHIFT+R)",
+    keys = {keys.leftCtrl, keys.leftShift, keys.r},
+    f = function()
+      _ENV.wm.reloadModules()
     end,
   },
 }
@@ -83,6 +90,7 @@ while true do
       if ok then
         logger:debug("[HotkeyService] Hotkey pressed: %s", v.name)
         v.f()
+        heldKeys = {}
         debounce = true
       end
     end

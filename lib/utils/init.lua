@@ -47,4 +47,14 @@ function utils.uuid()
   end)
 end
 
+--- Checks if a table contains a value.
+-- @tparam table tbl The table to check
+-- @tparam any val The value to check for
+function utils.tableContains(tbl, val)
+  for _, v in pairs(tbl) do
+    if v == val then return true end
+  end
+  return false
+end
+
 return utils
