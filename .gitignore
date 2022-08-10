@@ -39,7 +39,10 @@ luac.out
 *.x86_64
 *.hex
 
+# zwm
+.painapi
+docs/
+
 *.log
 pain.lua
-.painapi
 cloud.lua

@@ -200,7 +200,7 @@ function events:fire(e, processes, displayOrder)
             self.windowResizeState = {
                 x = e[3],
                 y = e[4],
-                idx = o
+                idx = o,
             }
           end
           -- Did not match mouse

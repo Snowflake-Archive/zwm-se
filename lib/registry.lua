@@ -1,4 +1,5 @@
 --- Registry getter & editor utilities
+-- @deprecated Soon to be replaced with RegistryReader & RegistryWriter.
 -- @module[kind=core] Registry
 
 local file = require(".lib.file")
@@ -6,6 +7,7 @@ local file = require(".lib.file")
 local registry = {}
 
 --- Reads a full registry file.
+-- @deprecated Use RegistryReader instead.
 -- @param from string The registry to read from (machine or user)
 -- @param isRaw boolean Whether the path is raw or not
 -- @return table The registry table
@@ -17,12 +19,14 @@ function registry.read(from, isRaw)
 end
 
 --- Reads a key from a registry file.
+-- @deprecated Use RegistryReader instead.
 -- @param from string The registry to read from (machine or user)
 -- @param key string The key to read. This is in compressed table format (e.g. One.Two.Three)
 -- @param isRaw boolean Whether the path is raw or not
+-- @param data table The registry table to read from
 -- @return string The value of the key
-function registry.readKey(from, key, isRaw)
-  local data = registry.read(from, isRaw)
+function registry.readKey(from, key, isRaw, data)
+  local data = data or registry.read(from, isRaw)
   local children = data
   
   for t in key:gmatch("[^%.]+") do
@@ -45,6 +49,7 @@ function registry.readKey(from, key, isRaw)
 end
 
 --- Gets a key's type.
+-- @deprecated Use RegistryReader instead.
 -- @param from string The registry to read from (machine or user)
 -- @param key string The key to read. This is in compressed table format (e.g. One.Two.Three)
 function registry.getKeyType(from, key)
@@ -61,6 +66,7 @@ function registry.getKeyType(from, key)
 end
 
 --- Gets a key's enum values.
+-- @deprecated Use RegistryReader instead.
 -- @param from string The registry to read from (machine or user)
 -- @param key string The key to read. This is in compressed table format (e.g. One.Two.Three)
 function registry.getEnumValues(from, key)
@@ -79,12 +85,14 @@ function registry.getEnumValues(from, key)
 end
 
 --- Reads a key from a registry file.
+-- @deprecated
 -- @param from string The registry to write to (machine or user)
 -- @param key string The key to write to. This is in compressed table format (e.g. One.Two.Three)
 -- @param data any What to write to the key. This must be the same as what the item is defined as.
+-- @param children table What to search in
 -- @return string The value of the key
-function registry.writeKey(from, key, data)
-  local children = registry.read(from)
+function registry.writeKey(from, key, data, children)
+  local children = children or registry.read(from)
 
   local t = children
   local items = {"folders"}
@@ -115,10 +123,14 @@ function registry.writeKey(from, key, data)
 
   t[items[#items - 1]] = items[#items]
   file.writeJSON("/bin/Registry/" .. from .. ".json", children)
+
+  os.queueEvent("registry_update", from, key)
+
   return children
 end
 
 --- Upgrades an old registry to a new one.
+-- @deprecated
 -- @tparam table from The registry to read from
 -- @tparam table to The registry to write to
 -- @return The table that was created

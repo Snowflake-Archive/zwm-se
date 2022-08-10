@@ -1,6 +1,6 @@
 -- Module imports
 local logger = require(".lib.log")
-local registry = require(".lib.registry")
+local RegistryReader = require(".lib.RegistryReader")
 
 local makePackage = dofile("rom/modules/main/cc/require.lua").make
 
@@ -16,6 +16,8 @@ local windowRenderer = require(".bin.WindowManagerModules.WindowRenderer"):new(l
 local windowEvents = require(".bin.WindowManagerModules.WindowEvents"):new(logger, buffer)
 local menu = require(".bin.WindowManagerModules.Menu"):new(logger, buffer)
 
+local userRegistry = RegistryReader:new("user")
+
 --- The window manager and it's functions.
 -- @module[kind=core] WindowManager
 local wm = {}
@@ -24,7 +26,7 @@ local nextProcessId = 0
 local nextRedraw = false
 
 xpcall(function()
-  -- Functions
+  -- Window manager API
 
   --- Gets the system's logger.
   -- @return Logger The logger.
@@ -111,15 +113,15 @@ xpcall(function()
       nextRedraw = true
 
       if options.isCentered then
-        options.x = math.floor((w / 2 - (options.w or 25) / 2) + 0.5)
-        options.y = math.floor((h / 2 - (options.h or 10) / 2) + 0.5)
+        options.x = math.floor(w / 2 - (options.w or 25) / 2 + 0.5)
+        options.y = math.floor(h / 2 - (options.h or 10) / 2 + 0.5)
       end
 
       newProcess.w = options.w or 25
       newProcess.h = options.h or 10
       newProcess.x = options.x or 2
       newProcess.y = options.y or 2
-      newProcess.title = (options.title or (type(process) == "string" and fs.getName(process) or "Untitled"))
+      newProcess.title = options.title or (type(process) == "string" and fs.getName(process) or "Untitled")
       newProcess.isResizeable = options.isResizeable == true or options.isResizeable == nil
       newProcess.hideFrame = options.hideFrame or false
       newProcess.minimized = options.minimized or false
@@ -202,7 +204,7 @@ xpcall(function()
               title = "Error",
               env = {
                 errorText = "The requested path, " .. process .. ", does not exist.",
-              }
+              },
             })
           end
         end, function(stop)
@@ -215,14 +217,14 @@ xpcall(function()
                   name = newProcess.title or "",
                   error = stop,
                   traceback = trace,
-                }
+                },
               },
               isCentered = true,
               w = 30,
               h = 14,
               title = "Crash Report",
               hideMaximize = true,
-              hideMinimize = true
+              hideMinimize = true,
             }, true)
           end
         end)
@@ -234,14 +236,8 @@ xpcall(function()
     return nextProcessId - 1
   end
 
+  -- Begin services
   wm.addProcess("/bin/Services/ServiceWorker.lua", {isService = true})
-
-  term.redirect(buffer)
-  buffer.setBackgroundColor(colors.lightGray)
-  buffer.clear()
-
-  windowRenderer:renderProcesses(processes, displayOrder)
-  menu:render(processes)
 
   parallel.waitForAny(
     function()
@@ -314,8 +310,12 @@ xpcall(function()
           end
         end
 
+        -- Fire events for menu & windows
+
         local displayOrder2, needsRedrawFromWinEvent, redrawWindows = windowEvents:fire(e, processes, displayOrder)
         local needsRedrawFromMenu = menu:fire(e)
+
+        -- Update displayOrder if needed, and check for redraw
 
         displayOrder = displayOrder2
         needsRedraw = needsRedraw or needsRedrawFromMenu or needsRedrawFromWinEvent or nextRedraw
@@ -330,36 +330,40 @@ xpcall(function()
         end
 
         if needsRedraw then
-          buffer.setBackgroundColor(registry.readKey("machine", "Appearance.BackgroundColor"))
+          -- Clear screen
+          buffer.setBackgroundColor(userRegistry:get("Appearance.DesktopBackgroundColor"))
           buffer.clear()
 
+          -- Render windows
           ensureDisplayOrder()
           windowRenderer:renderProcesses(processes, displayOrder)
           local cX, cY = term.getCursorPos()
 
+          -- Render menu
           menu:render(processes)
           local mX, mY = term.getCursorPos()
 
-          term.setCursorPos(cX, cY)
-
+          -- Cursor blink
           if menu.isMenuVisible == false and anyFocused == false then
             term.setCursorBlink(false)
-          end
-
-          if menu.isMenuVisible == true then
+          elseif menu.isMenuVisible == false and anyFocused == true then
+            term.setCursorPos(cX, cY)
+          elseif menu.isMenuVisible == true then
             term.setCursorPos(mX, mY)
           end
         elseif #redrawWindows > 0 then
+          -- If windows were redrawn, then just clear the main screen area and render windows.
+          -- This could possibly be made more efficent in the future, by figuring out z-indexes and such,
+          -- but that's for the future
           paintutils.drawFilledBox(1, 1, w, h - 1, colors.lightGray)
           windowRenderer:renderProcesses(processes, displayOrder)
         end
 
         nextRedraw = false
-      
       end
     end,
     function()
-      -- Buffer
+      -- Buffer (by Leveloper)
       buffer.setVisible(false)
       term.redirect(buffer)
 
@@ -367,8 +371,9 @@ xpcall(function()
         local _, h = buffer.getSize()
 
         for t = 0, 15 do
-          native.setPaletteColor(2^t, buffer.getPaletteColor(2^t))
+          native.setPaletteColor(2 ^ t, buffer.getPaletteColor(2 ^ t))
         end
+        
         local cursorPos = {buffer.getCursorPos()}
         local cursorBlink = buffer.getCursorBlink()
         local color = buffer.getTextColor()

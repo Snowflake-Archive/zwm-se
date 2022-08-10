@@ -1,5 +1,7 @@
 local util = require(".lib.util")
-local registry = require(".lib.registry")
+local registry = require(".lib.RegistryReader")
+
+local user = registry:new("user")
 
 local renderer = {}
 
@@ -15,6 +17,15 @@ function renderer:new(logger, buffer, displayOrder, processes)
   self.processes = processes
   self.logger = logger
   self.backgroundLayers = {}
+  self.registryCache = {
+    WindowFocused = user:get("Appearance.Window.WindowFocused"),
+    WindowUnfocused = user:get("Appearance.Window.WindowUnfocused"),
+    TitlebarText = user:get("Appearance.Window.TitlebarText"),
+    CloseButton = user:get("Appearance.Window.CloseButton"),
+    CloseButtonText = user:get("Appearance.Window.CloseButtonText"),
+    ControlButton = user:get("Appearance.Window.ControlButton"),
+    ControlButtonText = user:get("Appearance.Window.ControlButtonText"),
+  }
 
   return o
 end
@@ -32,22 +43,22 @@ function renderer:renderProcess(p)
     if not p.hideFrame then
       -- Topbar Rendering
 
-      local color = p.focused and registry.readKey("machine", "Appearance.WindowFocused") or registry.readKey("machine", "Appearance.WindowUnfocused")
+      local color = p.focused and self.registryCache.WindowFocused or self.registryCache.WindowUnfocused
 
       paintutils.drawLine(p.x, p.y, p.x + p.w - 1, p.y, color)
-      term.setTextColor(registry.readKey("machine", "Appearance.TitlebarText"))
+      term.setTextColor(self.registryCache.TitlebarText)
       term.setCursorPos(p.x, p.y)
       term.write(p.title)
 
       term.setCursorPos(p.x + p.w - 3, p.y)
-      term.setBackgroundColor(registry.readKey("machine", "Appearance.CloseButton"))
-      term.setTextColor(registry.readKey("machine", "Appearance.CloseButtonText"))
+      term.setBackgroundColor(self.registryCache.CloseButton)
+      term.setTextColor(self.registryCache.CloseButtonText)
       term.write(" x ")
 
       local nextButtonRenderAt = p.x + p.w - 6
 
-      term.setBackgroundColor(registry.readKey("machine", "Appearance.ControlButton"))
-      term.setTextColor(registry.readKey("machine", "Appearance.ControlButtonText"))
+      term.setBackgroundColor(self.registryCache.ControlButton)
+      term.setTextColor(self.registryCache.ControlButtonText)
 
       if p.hideMaximize == false then
         term.setCursorPos(nextButtonRenderAt, p.y)

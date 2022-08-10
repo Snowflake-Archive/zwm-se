@@ -8,7 +8,12 @@
     },
     "SystemVersionName": {
       "type": "string",
-      "value": "Alpha Testing - 8/9/2022",
+      "value": "Alpha Testing",
+      "overrideOnUpdate": true
+    },
+    "SystemVersionDate": {
+      "type": "string",
+      "value": "8/9/2022",
       "overrideOnUpdate": true
     },
     "SystemVersionNumber": {

@@ -1,25 +1,8 @@
 {
   "values": {
-    "RegistryVersion": { "value": "2", "type": "number" },
-    "SystemVersionName": {
-      "value": "Alpha Testing - 8/4/2022",
-      "type": "string"
-    },
-    "SystemVersionNumber": { "value": "1", "type": "number" }
-  },
-  "folders": {
-    "Appearance": {
-      "folders": {},
-      "values": {
-        "WindowUnfocused": { "value": "8", "type": "number" },
-        "CloseButton": { "value": "16384", "type": "number" },
-        "ControlButtonText": { "value": "1", "type": "number" },
-        "ControlButton": { "value": "8", "type": "number" },
-        "WindowFocused": { "value": "512", "type": "number" },
-        "CloseButtonText": { "value": "1", "type": "number" },
-        "BackgroundColor": { "value": "256", "type": "number" },
-        "TitlebarText": { "value": "1", "type": "number" }
-      }
-    }
+    "RegistryVersion": { "value": "3", "type": "number" },
+    "SystemVersionName": { "value": "Alpha Testing", "type": "string" },
+    "SystemVersionNumber": { "value": "1", "type": "number" },
+    "SystemVersionDate": { "value": "8/9/2022", "type": "string" }
   }
 }

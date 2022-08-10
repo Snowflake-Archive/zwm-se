@@ -4,6 +4,7 @@ local button = require(".lib.ui.button")
 local eventManager = require(".lib.events")
 local scrollbox = require(".lib.ui.scrollbox")
 local focusableEventManager = require(".lib.ui.focusableEventManager")
+local RegistryReader = require(".lib.RegistryReader")
 
 local menu = {}
 
@@ -20,6 +21,7 @@ function menu:new(logger, buffer)
   self.isMenuVisible = false
   self.searchContent = ""
   self.term = term.current()
+  self.registry = RegistryReader:new("user")
 
   self.eventManager = eventManager:new()
   self.focusableEventManager = focusableEventManager:new()
@@ -31,9 +33,9 @@ function menu:new(logger, buffer)
   self.shutdownButton = button:new(1, 1, "O", function()
     os.reboot()
   end, nil, false, true, {
-    background = colors.red,
-    clicking = colors.pink,
-    text = colors.white
+    background = self.registry:get("Appearance.Menu.ShutdownBackground"),
+    clicking = self.registry:get("Appearance.Menu.ShutdownFocused"),
+    text = self.registry:get("Appearance.Menu.ShutdownText"),
   })
 
   self.focusableEventManager:addInput(self.searchInput)
@@ -59,67 +61,73 @@ function menu:render(processes)
     self.processes = processes
   end
 
+  -- Prep
   local oldX, oldY = term.getCursorPos()
   local oldColor = term.getTextColor()
   term.redirect(self.buffer)
   local w, h = term.getSize()
-  term.setCursorPos(1, h)
+  self.w = w
+  self.h = h
 
-  term.setTextColor(colors.white)
-  term.setBackgroundColor(colors.gray)
+  -- Render menubar
+  term.setCursorPos(1, h)
+  term.setTextColor(self.registry:get("Appearance.Menu.MenuText"))
+  term.setBackgroundColor(self.registry:get("Appearance.Menu.MenuBackground"))
   term.clearLine()
   
-  term.setTextColor(self.isMenuVisible and colors.lightGray or colors.white)
-  term.setBackgroundColor(self.isMenuVisible and colors.black or colors.gray)
+  term.setTextColor(self.isMenuVisible and self.registry:get("Appearance.Menu.MenuFocusedText") or self.registry:get("Appearance.Menu.MenuText"))
+  term.setBackgroundColor(self.isMenuVisible and self.registry:get("Appearance.Menu.MenuFocusedBackground") or self.registry:get("Appearance.Menu.MenuBackground"))
   
   term.write(" + ")
 
+  --[[
+  TODO: make this work properly
+
   term.setTextColor(colors.white)
   term.setBackgroundColor(colors.gray)
-
   local time = os.time("ingame")
   local timeString = textutils.formatTime(time, true)
   term.setCursorPos(w - #timeString, h)
   term.write(timeString)
+  ]]
 
+  -- Render processes on menubar
   term.setCursorPos(4, h)
   self.processPositions = {}
-
-  self.w = w
-  self.h = h
 
   for i, v in pairs(self.processes) do
     if v.isService ~= true then
       local x = term.getCursorPos()
-      if v.focused then
-        term.setBackgroundColor(colors.black)
-      else
-        term.setBackgroundColor(colors.gray)
-      end
+      term.setTextColor(v.focused and self.registry:get("Appearance.Menu.MenuFocusedText") or self.registry:get("Appearance.Menu.MenuText"))
+      term.setBackgroundColor(v.focused and self.registry:get("Appearance.Menu.MenuFocusedBackground") or self.registry:get("Appearance.Menu.MenuBackground"))
+
       term.write((" %s "):format(v.title or fs.getName(v.startedFrom)))
       local xE = term.getCursorPos()
 
       table.insert(self.processPositions, {
         min = x,
         max = xE - 1,
-        id = i
+        id = i,
       })
     end
   end
 
-  util.drawPixelCharacter(w, h, false, true, false, true, false, true, colors.black, colors.gray)
-  self.searchInput:setVisible(self.isMenuVisible)
-
   if self.isMenuVisible then
-    paintutils.drawFilledBox(1, h - 14, 16, h - 1, colors.gray)
+    paintutils.drawFilledBox(1, h - 14, 16, h - 1, self.registry:get("Appearance.Menu.MenuBackground"))
+    term.setTextColor(self.registry:get("Appearance.Menu.MenuText"))
+
+    -- Make everything visible
     self.shutdownButton:setVisible(true)
     self.searchInput:setVisible(true)
+  
+    -- Move items to desired positions
     self.searchInput:reposition(2, h - 2)
     self.shutdownButton:reposition(15, h - 2)
     self.scroll:reposition(2, h - 13)
     self.scroll:redraw()
   else
     self.shutdownButton:setVisible(false)
+    self.searchInput:setVisible(false)
   end
 
   term.setTextColor(oldColor)

@@ -3,24 +3,32 @@ local file = require(".lib.file")
 
 print("Checking for registry updates...")
 
-if fs.exists("/bin/Registry/machine.json") then
-  local current = registry.readKey("/bin/RegistryDefaults/machine.json", "RegistryVersion", true)
-  local old = registry.readKey("machine", "RegistryVersion")
+local function updateRegistry(version)
+  local path = ("/bin/RegistryDefaults/%s.json"):format(version)
+  local save = ("/bin/Registry/%s.json"):format(version)
 
-  if current > old then
-    print("Updating registry...")
+  if fs.exists(save) then
+    local current = registry.readKey(path, "RegistryVersion", true)
+    local old = registry.readKey("machine", "RegistryVersion")
 
-    local currFull = registry.read("machine")
-    local new = registry.read("/bin/RegistryDefaults/machine.json", true)
-    file.writeJSON("/bin/Registry/machine.json", registry.update(currFull, new))
-    print("Updated registry to version " .. current)
+    if current > old then
+      print("Updating " .. version .. " registry...")
+
+      local currFull = registry.read("machine")
+      local new = registry.read(path, true)
+      file.writeJSON(save, registry.update(currFull, new))
+      print("Updated " .. version .. " registry to version " .. current)
+    end
+  else
+    print("Creating " .. version .. " registry...")
+    local currentFull = registry.read(path, true)
+    file.writeJSON(save, registry.update({}, currentFull))
+    print("Created " .. version .. " registry")
   end
-else
-  print("Creating registry...")
-  local currentFull = registry.read("/bin/RegistryDefaults/machine.json", true)
-  file.writeJSON("/bin/Registry/machine.json", registry.update({}, currentFull))
-  print("Created registry")
 end
+
+updateRegistry("machine")
+updateRegistry("user")
 
 print("Starting window manager...")
 shell.run("/bin/wm.lua")

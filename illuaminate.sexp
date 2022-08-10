@@ -1,6 +1,7 @@
 ; -*- mode: Lisp;-*-
 
 (sources
+  /bin/
   /lib/
   /docs-src/
 )

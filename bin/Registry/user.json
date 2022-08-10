@@ -18,7 +18,6 @@
             "MenuText": { "type": "number", "value": "1" },
             "MenuFocusedBackground": { "type": "number", "value": "32768" },
             "MenuFocusedText": { "type": "number", "value": "1" },
-
             "ShutdownBackground": { "type": "number", "value": "16384" },
             "ShutdownFocused": { "type": "number", "value": "64" },
             "ShutdownText": { "type": "number", "value": "1" }
@@ -69,8 +68,7 @@
     "UserName": { "type": "string", "value": "User" },
     "RegistryVersion": {
       "type": "number",
-      "value": "1",
-      "overrideOnUpdate": true
+      "value": "1"
     }
   }
 }

@@ -4,15 +4,18 @@
     [ ] Menubars
     [X] Buttons
     [X] Inputs
+    [ ] Theming via registry
 [X] Window manager
     [X] Basic window management features
     [X] Minimization
-[X] Menu bar
+    [X] Theming via registry
 [ ] Menu
     [X] Buttons and inputs
     [ ] Shutdown menu
     [ ] Scroll area
     [ ] Searching
+    [X] Theming via registry
+    
 
 bugs:
 - clock does not update (only on full or menu re-render)

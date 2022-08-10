@@ -37,7 +37,7 @@ local hotkeys = {
         title = "Lua",
       }, true)
     end,
-  }
+  },
 }
 
 local heldKeys = {}

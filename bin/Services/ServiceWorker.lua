@@ -13,8 +13,8 @@ for i, v in pairs(services) do
   _ENV.wm.addProcess(v, {
     isService = true, 
     env = {
-      wm = _ENV.wm
-    }
+      wm = _ENV.wm,
+    },
   })
   logger:info("[ServiceWorker] Started service %d of %d: %s", i, #services, v)
 end
