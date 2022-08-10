@@ -1,5 +1,6 @@
 --- The window manager and it's functions.
 -- @module[kind=core] WindowManager
+
 local wm = {}
 
 --- Gets the system's logger.
