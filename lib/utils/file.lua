@@ -1,5 +1,5 @@
 --- File utilities for saving and reading files
--- @module[kind=core] FileUtils
+-- @module[kind=utils] Files
 
 local file = {}
 

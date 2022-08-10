@@ -1,29 +1,33 @@
-local registry = require(".lib.registry")
-local file = require(".lib.file")
+local reader = require(".lib.registry.Reader")
+local updater = require(".lib.registry.Updater")
+local file = require(".lib.utils.file")
 
 print("Checking for registry updates...")
 
-local function updateRegistry(version)
-  local path = ("/bin/RegistryDefaults/%s.json"):format(version)
-  local save = ("/bin/Registry/%s.json"):format(version)
+local function updateRegistry(name)
+  local path = ("/bin/RegistryDefaults/%s.json"):format(name)
+  local save = ("/bin/Registry/%s.json"):format(name)
 
   if fs.exists(save) then
-    local current = registry.readKey(path, "RegistryVersion", true)
-    local old = registry.readKey("machine", "RegistryVersion")
+    local oldReader = reader:new(name)
+    local newReader = reader:new(name, true)
+
+    local current = newReader:get("RegistryVersion")
+    local old = oldReader:get("RegistryVersion")
 
     if current > old then
-      print("Updating " .. version .. " registry...")
+      print("Updating " .. name .. " registry...")
 
-      local currFull = registry.read("machine")
-      local new = registry.read(path, true)
-      file.writeJSON(save, registry.update(currFull, new))
-      print("Updated " .. version .. " registry to version " .. current)
+      local currFull = oldReader.data
+      local new = newReader.data
+      file.writeJSON(save, updater(currFull, new))
+      print("Updated " .. name .. " registry to version " .. current)
     end
   else
-    print("Creating " .. version .. " registry...")
-    local currentFull = registry.read(path, true)
-    file.writeJSON(save, registry.update({}, currentFull))
-    print("Created " .. version .. " registry")
+    print("Creating " .. name .. " registry...")
+    local default = reader:new(name, true)
+    file.writeJSON(save, updater({}, default.data))
+    print("Created " .. name .. " registry")
   end
 end
 

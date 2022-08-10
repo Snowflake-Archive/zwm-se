@@ -1,10 +1,10 @@
-local util = require(".lib.util")
+local util = require(".lib.utils")
 local input = require(".lib.ui.input")
 local button = require(".lib.ui.button")
 local eventManager = require(".lib.events")
 local scrollbox = require(".lib.ui.scrollbox")
 local focusableEventManager = require(".lib.ui.focusableEventManager")
-local RegistryReader = require(".lib.RegistryReader")
+local RegistryReader = require(".lib.registry.Reader")
 
 local menu = {}
 

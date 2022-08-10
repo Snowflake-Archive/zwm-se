@@ -1,7 +1,7 @@
 --- Inputs with many features. Includes an event manager for the inputs aswell.
 -- @module[kind=ui] Input
 
-local util = require(".lib.util")
+local drawing = require(".lib.utils.draw")
 local strings = require("cc.strings")
 
 local input = {}
@@ -93,7 +93,7 @@ end
 function input:render()
   if self.visible then
     self.bgOnRender = term.getBackgroundColor()
-    util.drawBorder(self.x - 1, self.y - 1, self.w + 4, 3, self.isFocused and colors.lightBlue or colors.lightGray, "1-box")
+    drawing.drawBorder(self.x - 1, self.y - 1, self.w + 4, 3, self.isFocused and colors.lightBlue or colors.lightGray, "1-box")
     term.setTextColor(colors.black)
     term.setBackgroundColor(colors.white)
     term.setCursorPos(self.x, self.y)

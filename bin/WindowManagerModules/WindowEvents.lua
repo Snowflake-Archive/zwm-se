@@ -13,6 +13,21 @@ local function redirect(process, e)
   coroutine.resume(process.coroutine, unpack(e))
 end
 
+--- Creates a window renderr manager.
+-- @return WindowRenderer The window renderer
+function events:new(logger, buffer)
+  local o = {}
+  setmetatable(o, self)
+  self.__index = self
+
+  self.buffer = buffer
+  self.logger = logger
+  self.windowDraggingState = nil
+  self.windowResizingState = nil
+
+  return o
+end
+
 function events:redirectEventsForMouse(p, e, idx)
   if p.hideFrame then
     redirect(p, {e[1], e[2], e[3] - p.x, e[4] - p.y}) 
@@ -50,6 +65,10 @@ function events:redirectEventsForMouse(p, e, idx)
               p.y = p.y_orig
               p.window.reposition(p.x, p.y + 1, p.w, p.h - 1)
             end
+
+            term.redirect(p.window)
+            coroutine.resume(p.coroutine, "term_resize")
+            term.redirect(self.buffer)
 
             return true
           end
@@ -121,21 +140,6 @@ function events:windowDrag(e, processes)
     coroutine.resume(p.coroutine, "term_resize")
     term.redirect(old)
   end
-end
-
---- Creates a window renderr manager.
--- @return WindowRenderer The window renderer
-function events:new(logger, buffer)
-  local o = {}
-  setmetatable(o, self)
-  self.__index = self
-
-  self.buffer = buffer
-  self.logger = logger
-  self.windowDraggingState = nil
-  self.windowResizingState = nil
-
-  return o
 end
 
 function events:fire(e, processes, displayOrder)

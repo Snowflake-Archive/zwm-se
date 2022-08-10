@@ -4,5 +4,6 @@
     "SystemVersionName": { "value": "Alpha Testing", "type": "string" },
     "SystemVersionNumber": { "value": "1", "type": "number" },
     "SystemVersionDate": { "value": "8/9/2022", "type": "string" }
-  }
+  },
+  "folders": {}
 }

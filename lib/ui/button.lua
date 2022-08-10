@@ -1,7 +1,7 @@
 --- Really fancy buttons
 -- @module[kind=ui] Button
 
-local util = require(".lib.util")
+local drawing = require(".lib.utils.draw")
 
 local button = {}
 
@@ -102,7 +102,7 @@ function button:render(useBgRender)
       color = self.colors.focused or colors.lightBlue
     end
 
-    util.drawBorder(self.x - 1, self.y - 1, #displayStr + 2, 3, color, "1-box")
+    drawing.drawBorder(self.x - 1, self.y - 1, #displayStr + 2, 3, color, "1-box")
 
     term.setCursorPos(self.x, self.y)
     term.setBackgroundColor(self.colors.background or colors.lightGray)

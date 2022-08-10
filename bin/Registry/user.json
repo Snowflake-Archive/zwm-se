@@ -1,46 +1,50 @@
 {
+  "values": {
+    "UserName": { "value": "User", "type": "string" },
+    "RegistryVersion": { "value": "1", "type": "number" }
+  },
   "folders": {
     "Menu": {
       "folders": {},
       "values": {
         "PinnedApps": {
-          "type": "table",
-          "value": "[{\"name\": \"Shell\", \"path\": \"/rom/programs/shell.lua\"}, {\"name\": \"Lua\", \"path\": \"/rom/programs/lua.lua\"}]"
+          "value": "[{\"name\": \"Shell\", \"path\": \"/rom/programs/shell.lua\"}, {\"name\": \"Lua\", \"path\": \"/rom/programs/lua.lua\"}]",
+          "type": "table"
         }
       }
     },
     "Appearance": {
       "folders": {
-        "Menu": {
+        "Application": {
           "folders": {},
           "values": {
-            "MenuBackground": { "type": "number", "value": "128" },
-            "MenuText": { "type": "number", "value": "1" },
-            "MenuFocusedBackground": { "type": "number", "value": "32768" },
-            "MenuFocusedText": { "type": "number", "value": "1" },
-            "ShutdownBackground": { "type": "number", "value": "16384" },
-            "ShutdownFocused": { "type": "number", "value": "64" },
-            "ShutdownText": { "type": "number", "value": "1" }
+            "ApplicationText": { "value": "128", "type": "number" },
+            "ApplicationBackground": { "value": "1", "type": "number" },
+            "ApplicationTextStrong": { "value": "32768", "type": "number" }
           }
         },
         "Window": {
           "folders": {},
           "values": {
-            "WindowUnfocused": { "type": "number", "value": "8" },
-            "WindowFocused": { "type": "number", "value": "512" },
-            "ControlButton": { "type": "number", "value": "8" },
-            "CloseButton": { "type": "number", "value": "16384" },
-            "TitlebarText": { "type": "number", "value": "1" },
-            "ControlButtonText": { "type": "number", "value": "1" },
-            "CloseButtonText": { "type": "number", "value": "1" }
+            "WindowUnfocused": { "value": "8", "type": "number" },
+            "CloseButton": { "value": "16384", "type": "number" },
+            "ControlButtonText": { "value": "1", "type": "number" },
+            "ControlButton": { "value": "8", "type": "number" },
+            "WindowFocused": { "value": "512", "type": "number" },
+            "CloseButtonText": { "value": "1", "type": "number" },
+            "TitlebarText": { "value": "1", "type": "number" }
           }
         },
-        "Application": {
+        "Menu": {
           "folders": {},
           "values": {
-            "ApplicationBackground": { "type": "number", "value": "1" },
-            "ApplicationText": { "type": "number", "value": "128" },
-            "ApplicationTextStrong": { "type": "number", "value": "32768" }
+            "ShutdownFocused": { "value": "64", "type": "number" },
+            "MenuFocusedBackground": { "value": "32768", "type": "number" },
+            "ShutdownText": { "value": "1", "type": "number" },
+            "ShutdownBackground": { "value": "16384", "type": "number" },
+            "MenuText": { "value": "1", "type": "number" },
+            "MenuFocusedText": { "value": "1", "type": "number" },
+            "MenuBackground": { "value": "128", "type": "number" }
           }
         },
         "UserInterface": {
@@ -48,11 +52,11 @@
             "Button": {
               "folders": {},
               "values": {
-                "Background": { "type": "number", "value": "256" },
-                "Text": { "type": "number", "value": "32768" },
-                "TextDisabled": { "type": "number", "value": "256" },
-                "Clicking": { "type": "number", "value": "128" },
-                "Focused": { "type": "number", "value": "8" }
+                "Clicking": { "value": "128", "type": "number" },
+                "Focused": { "value": "8", "type": "number" },
+                "TextDisabled": { "value": "256", "type": "number" },
+                "Text": { "value": "32768", "type": "number" },
+                "Background": { "value": "256", "type": "number" }
               }
             }
           },
@@ -60,15 +64,8 @@
         }
       },
       "values": {
-        "DesktopBackgroundColor": { "type": "number", "value": "256" }
+        "DesktopBackgroundColor": { "value": "256", "type": "number" }
       }
-    }
-  },
-  "values": {
-    "UserName": { "type": "string", "value": "User" },
-    "RegistryVersion": {
-      "type": "number",
-      "value": "1"
     }
   }
 }

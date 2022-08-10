@@ -1,6 +1,6 @@
 -- Module imports
 local logger = require(".lib.log")
-local RegistryReader = require(".lib.RegistryReader")
+local RegistryReader = require(".lib.Registry.Reader")
 
 local makePackage = dofile("rom/modules/main/cc/require.lua").make
 

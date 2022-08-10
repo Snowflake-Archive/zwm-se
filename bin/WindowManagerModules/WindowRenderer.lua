@@ -1,5 +1,7 @@
-local util = require(".lib.util")
-local registry = require(".lib.RegistryReader")
+local utils = require(".lib.utils")
+local drawUtils = require(".lib.utils.draw")
+local colorUtils = require(".lib.utils.colors")
+local registry = require(".lib.registry.Reader")
 
 local user = registry:new("user")
 
@@ -79,7 +81,7 @@ function renderer:renderProcess(p)
             if p.y + i - 1 <= h - 1 then
               local _, _, lineB = self.buffer.getLine(p.y + i - 1)
 
-              local use = util.fromBlit(util.selectXfromBlit(p.x - 1, lineB))
+              local use = colorUtils.fromBlit(utils.selectXfromBlit(p.x - 1, lineB))
 
               if self.backgroundLayers[p.y + i - 1] and self.backgroundLayers[p.y + i - 1][p.x] then
                 use = self.backgroundLayers[p.y + i - 1][p.x]
@@ -91,14 +93,14 @@ function renderer:renderProcess(p)
                 self.backgroundLayers[p.y + i - 1][p.x] = use
               end
               
-              util.drawPixelCharacter(p.x - 1, p.y + i - 1, false, true, false, true, false, true, color, use)
+              drawUtils.drawPixelCharacter(p.x - 1, p.y + i - 1, false, true, false, true, false, true, color, use)
             end
           end
 
         
           if p.y + p.h <= h - 1 then
             local _, _, line2 = self.buffer.getLine(p.y + p.h)
-            util.drawPixelCharacter(p.x - 1, p.y + p.h, false, true, false, false, false, false, color, util.fromBlit(util.selectXfromBlit(p.x - 1, line2)))
+            drawUtils.drawPixelCharacter(p.x - 1, p.y + p.h, false, true, false, false, false, false, color, colorUtils.fromBlit(utils.selectXfromBlit(p.x - 1, line2)))
           end
         end
 
@@ -107,14 +109,14 @@ function renderer:renderProcess(p)
           local _, _, line2 = self.buffer.getLine(p.y + p.h)
           for i = 1, p.w do
             if p.x + i - 1 <= w and p.x + i - 1 >= 1 then
-              local bg = util.fromBlit(util.selectXfromBlit(p.x + i - 1, line2))
-              util.drawPixelCharacter(p.x + i - 1, p.y + p.h, true, true, false, false, false, false, color, bg)
+              local bg = colorUtils.fromBlit(utils.selectXfromBlit(p.x + i - 1, line2))
+              drawUtils.drawPixelCharacter(p.x + i - 1, p.y + p.h, true, true, false, false, false, false, color, bg)
             end
           end
 
           
           if p.x + p.w <= w then
-            util.drawPixelCharacter(p.x + p.w, p.y + p.h, true, false, false, false, false, false, color, util.fromBlit(util.selectXfromBlit(p.x + p.w, line2)))
+            drawUtils.drawPixelCharacter(p.x + p.w, p.y + p.h, true, false, false, false, false, false, color, colorUtils.fromBlit(utils.selectXfromBlit(p.x + p.w, line2)))
           end
         end
 
@@ -123,8 +125,8 @@ function renderer:renderProcess(p)
           for i = 1, p.h do
             if p.y + i - 1 <= h - 1 then
               local _, _, line3 = self.buffer.getLine(p.y + i - 1)
-              local bg = util.fromBlit(util.selectXfromBlit(p.x + p.w, line3))
-              util.drawPixelCharacter(p.x + p.w, p.y + i - 1, true, false, true, false, true, false, color, bg)
+              local bg = colorUtils.fromBlit(utils.selectXfromBlit(p.x + p.w, line3))
+              drawUtils.drawPixelCharacter(p.x + p.w, p.y + i - 1, true, false, true, false, true, false, color, bg)
 
               if self.backgroundLayers[p.y + i - 1] == nil then
                 self.backgroundLayers[p.y + i - 1] = {}

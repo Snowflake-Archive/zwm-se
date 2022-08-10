@@ -17,8 +17,11 @@
 
   (module-kinds
     (core Core)
+    (utils Utilities)
+    (registry Registry)
     (ui UI)
     (tables Tables)
+    (deprecated Deprecated)
   )
 
   (library-path

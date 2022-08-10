@@ -1,21 +1,33 @@
 --- Util for reading registries
--- @module[kind=core] RegistryReader
+-- @module[kind=registry] Reader
 
 local RegistryReader = {}
 
-local file = require(".lib.file")
+local file = require(".lib.utils.file")
 
 --- Creates a new RegistryReader.
--- @tparam string path The path to the registry file
--- @tparam[opt] boolean isRaw Whether the path is raw or not
-function RegistryReader:new(path, useRawPath)
+-- @tparam string name The name of the registry file
+-- @tparam boolean fromDefaults If this is true, the registry will be read from the defaults folder
+function RegistryReader:new(name, fromDefaults)
   local o = {}
   setmetatable(o, self)
   self.__index = self
+  self.name = name
+  self.path = "/bin/Registry" .. (fromDefaults and "Defaults" or "") .. "/" .. name .. ".json"
 
-  self.data = file.readJSON(useRawPath and path or "/bin/Registry/" .. path .. ".json")
+  self.data = file.readJSON(self.path)
 
   return o
+end
+
+--- Reloads the registry.
+-- @tparam[opt] table data If this is provided, data will be read from the table instead of the file
+function RegistryReader:reload(data)
+  if data then
+    self.data = data
+  else
+    self.data = file.readJSON(self.path)
+  end
 end
 
 --- Reads a key.
