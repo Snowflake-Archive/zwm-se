@@ -2,7 +2,9 @@
 -- @module[kind=ui] Button
 
 local drawing = require(".lib.utils.draw")
+local reigstryReader = require(".lib.registry.Reader")
 
+local reader = reigstryReader:new("user")
 local button = {}
 
 --- Creates a new button. The buttons width will be #text + 4.
@@ -94,19 +96,22 @@ function button:render(useBgRender)
       self.bgOnRender = term.getBackgroundColor()
     end
 
-    local color = self.colors.background or colors.lightGray
+    local color = self.colors.background or reader:get("Appearance.UserInterface.Button.Background")
 
     if self.isBeingClicked == true then
-      color = self.colors.clicking or colors.gray
+      color = self.colors.clicking or reader:get("Appearance.UserInterface.Button.Clicking")
     elseif self.isFocused == true then
-      color = self.colors.focused or colors.lightBlue
+      color = self.colors.focused or reader:get("Appearance.UserInterface.Button.Focused")
     end
 
     drawing.drawBorder(self.x - 1, self.y - 1, #displayStr + 2, 3, color, "1-box")
 
     term.setCursorPos(self.x, self.y)
-    term.setBackgroundColor(self.colors.background or colors.lightGray)
-    term.setTextColor(self.disabled and (self.colors.textDisabled or colors.gray) or (self.colors.text or colors.black))
+    term.setBackgroundColor(self.colors.background or reader:get("Appearance.UserInterface.Button.Background"))
+    term.setTextColor(self.disabled and 
+      (self.colors.textDisabled or reader:get("Appearance.UserInterface.Button.TextDisabled")) 
+      or (self.colors.text or reader:get("Appearance.UserInterface.Button.Text"))
+    )
     
     term.write(displayStr)
 

@@ -55,6 +55,17 @@
                 "Clicking": { "type": "number", "value": "128" },
                 "Focused": { "type": "number", "value": "8" }
               }
+            },
+            "Input": {
+              "folders": {},
+              "values": {
+                "Background": { "type": "number", "value": "1" },
+                "Border": { "type": "number", "value": "256" },
+                "Focused": { "type": "number", "value": "8" },
+                "Text": { "type": "number", "value": "32768" },
+                "PlaceholderText": { "type": "number", "value": "256" },
+                "DisabledText": { "type": "number", "value": "256" }
+              }
             }
           },
           "values": {}

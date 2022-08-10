@@ -4,7 +4,7 @@
     [ ] Menubars
     [X] Buttons
     [X] Inputs
-    [ ] Theming via registry
+    [X] Theming via registry
 [X] Window manager
     [X] Basic window management features
     [X] Minimization

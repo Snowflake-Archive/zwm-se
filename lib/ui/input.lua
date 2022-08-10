@@ -3,7 +3,9 @@
 
 local drawing = require(".lib.utils.draw")
 local strings = require("cc.strings")
+local reigstryReader = require(".lib.registry.Reader")
 
+local reader = reigstryReader:new("user")
 local input = {}
 
 --- Creates a new input object.
@@ -93,15 +95,19 @@ end
 function input:render()
   if self.visible then
     self.bgOnRender = term.getBackgroundColor()
-    drawing.drawBorder(self.x - 1, self.y - 1, self.w + 4, 3, self.isFocused and colors.lightBlue or colors.lightGray, "1-box")
-    term.setTextColor(colors.black)
-    term.setBackgroundColor(colors.white)
+    drawing.drawBorder(self.x - 1, self.y - 1, self.w + 4, 3, 
+      self.isFocused and 
+      reader:get("Appearance.UserInterface.Input.Focused") or 
+      reader:get("Appearance.UserInterface.Input.Border"), 
+      "1-box")
+    term.setTextColor(reader:get("Appearance.UserInterface.Input.Text"))
+    term.setBackgroundColor(reader:get("Appearance.UserInterface.Input.Background"))
     term.setCursorPos(self.x, self.y)
     term.write((" "):rep(self.w + 2))
     term.setCursorPos(self.x, self.y)
 
     if #self.content == 0 then
-      term.setTextColor(colors.lightGray)
+      term.setTextColor(reader:get("Appearance.UserInterface.Input.PlaceholderText"))
       term.write(strings.ensure_width(self.placeholder, self.w))
     else
       term.write(self.content:sub(self.displayStartAt + 1, self.displayStartAt + self.w + 1))
@@ -113,7 +119,7 @@ function input:render()
       else
         term.setCursorPos(self.x + (self.cursor - self.displayStartAt), self.y)
       end
-      term.setTextColor(colors.black)
+      term.setTextColor(reader:get("Appearance.UserInterface.Input.Text"))
       term.setCursorBlink(true)
     else
       term.setCursorBlink(false)
