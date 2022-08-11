@@ -26,6 +26,8 @@ local nextProcessId = 0
 local nextRedraw = false
 
 xpcall(function()
+  menu:init()
+
   -- Window manager API
 
   --- Gets the system's logger.
@@ -241,6 +243,9 @@ xpcall(function()
     windowRenderer = require(".bin.WindowManagerModules.WindowRenderer"):new(logger, buffer, displayOrder, processes)
     windowEvents = require(".bin.WindowManagerModules.WindowEvents"):new(logger, buffer)
     menu = require(".bin.WindowManagerModules.Menu"):new(logger, buffer, wm)    
+
+    menu:init()
+
     wm.addProcess("/bin/Prompts/Info.lua", {
       isCentered = true,
       w = 32,

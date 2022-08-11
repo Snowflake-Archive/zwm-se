@@ -79,24 +79,29 @@ local searchIgnore = {
 -- @return WindowRenderer The window renderer
 function menu:new(logger, buffer, wm)
   local o = {
-    buffer = buffer,
+    fullRender = false,
     wm = wm,
     logger = logger,
     processPositions = {},
     isMenuVisible = false,
     term = term.current(),
     searchLaunch = {},
+    buffer = buffer,
   }
 
   setmetatable(o, self)
   self.__index = self
 
+  return o
+end
+
+function menu:init()
   self.eventManager = eventManager:new()
   self.focusableEventManager = focusableEventManager:new()
 
   self.registry = RegistryReader:new("user")
 
-  self.scroll = scrollbox:new(1, 1, 15, 10, buffer, {y = true}, false)
+  self.scroll = scrollbox:new(1, 1, 15, 10, self.buffer, {y = true}, false)
 
   self.searchInput = input:new(1, 1, 9, function(data)
     searchContent = data
@@ -104,19 +109,18 @@ function menu:new(logger, buffer, wm)
   end, function() end, "Search...", nil, nil, false)
 
   self.shutdownButton = button:new(1, 1, "O", function()
-    os.reboot()
+    self.wm.addProcess("/bin/shutdown.lua", {hideFrame = true, isCentered = true}, true)
+    self:setMenuVisible(false)
   end, nil, false, true, {
-    background = o.registry:get("Appearance.Menu.ShutdownBackground"),
-    clicking = o.registry:get("Appearance.Menu.ShutdownFocused"),
-    text = o.registry:get("Appearance.Menu.ShutdownText"),
+    background = self.registry:get("Appearance.Menu.ShutdownBackground"),
+    clicking = self.registry:get("Appearance.Menu.ShutdownFocused"),
+    text = self.registry:get("Appearance.Menu.ShutdownText"),
   })
 
-  self.scroll:addToEventManager(o.eventManager)
-  self.focusableEventManager:addInput(o.searchInput)
-  self.focusableEventManager:addButton(o.shutdownButton)
-  self.focusableEventManager:inject(o.eventManager)
-
-  return o
+  self.scroll:addToEventManager(self.eventManager)
+  self.focusableEventManager:addInput(self.searchInput)
+  self.focusableEventManager:addButton(self.shutdownButton)
+  self.focusableEventManager:inject(self.eventManager)
 end
 
 function menu:renderScrollbox()
@@ -187,6 +191,10 @@ function menu:renderScrollbox()
   end
 end
 
+function menu:setMenuVisible(value)
+  self.isMenuVisible = value
+end
+
 function menu:render(processes)
   if processes then
     self.processes = processes
@@ -226,20 +234,22 @@ function menu:render(processes)
   term.setCursorPos(4, h)
   self.processPositions = {}
 
-  for i, v in pairs(self.processes) do
-    if v.isService ~= true then
-      local x = term.getCursorPos()
-      term.setTextColor(v.focused and self.registry:get("Appearance.Menu.MenuFocusedText") or self.registry:get("Appearance.Menu.MenuText"))
-      term.setBackgroundColor(v.focused and self.registry:get("Appearance.Menu.MenuFocusedBackground") or self.registry:get("Appearance.Menu.MenuBackground"))
+  if self.processes then
+    for i, v in pairs(self.processes) do
+      if v.isService ~= true then
+        local x = term.getCursorPos()
+        term.setTextColor(v.focused and self.registry:get("Appearance.Menu.MenuFocusedText") or self.registry:get("Appearance.Menu.MenuText"))
+        term.setBackgroundColor(v.focused and self.registry:get("Appearance.Menu.MenuFocusedBackground") or self.registry:get("Appearance.Menu.MenuBackground"))
 
-      term.write((" %s "):format(v.title or fs.getName(v.startedFrom)))
-      local xE = term.getCursorPos()
+        term.write((" %s "):format(v.title or fs.getName(v.startedFrom)))
+        local xE = term.getCursorPos()
 
-      table.insert(self.processPositions, {
-        min = x,
-        max = xE - 1,
-        id = i,
-      })
+        table.insert(self.processPositions, {
+          min = x,
+          max = xE - 1,
+          id = i,
+        })
+      end
     end
   end
 
@@ -330,7 +340,10 @@ function menu:fire(e)
     self:render()
   end
 
-  return oldIsMenuVisible ~= self.isMenuVisible
+  local oFullRender = self.fullRender
+  self.fullRender = false
+
+  return oldIsMenuVisible ~= self.isMenuVisible or oFullRender == true
 end
 
 return menu

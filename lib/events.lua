@@ -6,12 +6,9 @@ local eventManager = {}
 --- Creates a new event manager.
 -- @return EventManager The event manager
 function eventManager:new()
-  local o = {}
+  local o = {listeners = {}, isStopped = false}
   setmetatable(o, self)
   self.__index = self
-
-  self.listeners = {}
-  self.isStopped = false
 
   return o
 end

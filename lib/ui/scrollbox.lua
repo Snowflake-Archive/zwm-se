@@ -59,7 +59,7 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars, visible)
       
       local lineMin = o.y + 1
       local lineMax = o.y + o.h - 2
-      local progress = (-o.scrollY + 2) / o.maxHeight
+      local progress = (-o.scrollY + 2) / (o.maxHeight - o.h)
       local lineHeight = lineMax - lineMin
       local line = lineMin + math.floor(progress * lineHeight)
 
@@ -139,7 +139,7 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars, visible)
     redraw = redraw,
   }
 
-  o.sbterm = sbterm
+  self.sbterm = sbterm
   
   return o
 end
@@ -200,7 +200,7 @@ function scrollbox:ensureScroll(d)
 
   local canscroll = false
   if d == 1 then -- down
-    canscroll = -sY + 2 < ssY
+    canscroll = -sY + self.h + 1 < ssY
   elseif d == -1 then -- up
     canscroll = sY <= 0
   end
