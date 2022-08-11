@@ -9,6 +9,9 @@ local strings = require("cc.strings")
 
 local menu = {}
 
+local searchLaunch = {}
+local searchContent = ""
+
 local searchIgnore = {
   "bin/Assets",
   "bin/Prompts",
@@ -75,43 +78,43 @@ local searchIgnore = {
 --- Creates a window renderr manager.
 -- @return WindowRenderer The window renderer
 function menu:new(logger, buffer, wm)
-  local o = {}
+  local o = {
+    buffer = buffer,
+    wm = wm,
+    logger = logger,
+    processPositions = {},
+    isMenuVisible = false,
+    term = term.current(),
+    searchLaunch = {},
+  }
+
   setmetatable(o, self)
   self.__index = self
-
-  self.buffer = buffer
-  self.wm = wm
-  self.logger = logger
-  self.processPositions = {}
-  self.isMenuVisible = false
-  self.searchContent = ""
-  self.term = term.current()
-  self.registry = RegistryReader:new("user")
-  self.searchLaunch = {}
 
   self.eventManager = eventManager:new()
   self.focusableEventManager = focusableEventManager:new()
 
+  self.registry = RegistryReader:new("user")
+
+  self.scroll = scrollbox:new(1, 1, 15, 10, buffer, {y = true}, false)
+
   self.searchInput = input:new(1, 1, 9, function(data)
-    self.searchContent = data
+    searchContent = data
     self:renderScrollbox()
   end, function() end, "Search...", nil, nil, false)
 
   self.shutdownButton = button:new(1, 1, "O", function()
     os.reboot()
   end, nil, false, true, {
-    background = self.registry:get("Appearance.Menu.ShutdownBackground"),
-    clicking = self.registry:get("Appearance.Menu.ShutdownFocused"),
-    text = self.registry:get("Appearance.Menu.ShutdownText"),
+    background = o.registry:get("Appearance.Menu.ShutdownBackground"),
+    clicking = o.registry:get("Appearance.Menu.ShutdownFocused"),
+    text = o.registry:get("Appearance.Menu.ShutdownText"),
   })
 
-  self.focusableEventManager:addInput(self.searchInput)
-  self.focusableEventManager:addButton(self.shutdownButton)
-
-  self.focusableEventManager:inject(self.eventManager)
-  self.scroll = scrollbox:new(1, 1, 15, 10, buffer, {y = true}, false)
-  self.scroll:addToEventManager(self.eventManager)
-  self:renderScrollbox()
+  self.scroll:addToEventManager(o.eventManager)
+  self.focusableEventManager:addInput(o.searchInput)
+  self.focusableEventManager:addButton(o.shutdownButton)
+  self.focusableEventManager:inject(o.eventManager)
 
   return o
 end
@@ -119,7 +122,7 @@ end
 function menu:renderScrollbox()
   local t = self.scroll:getTerminal()
 
-  if #self.searchContent > 0 then
+  if #searchContent > 0 then
     t.setBackgroundColor(colors.gray)
     t.setTextColor(colors.white)
     t.clear()
@@ -137,7 +140,7 @@ function menu:renderScrollbox()
         if not util.tableContains(searchIgnore, fs.combine(dir, item)) then
           if fs.isDir(fs.combine(dir, item)) then
             search(fs.combine(dir, item), deep + 1)
-          elseif item:find(self.searchContent) and item:match("%.lua$") then
+          elseif item:find(searchContent) and item:match("%.lua$") then
             programs[#programs + 1] = {
               dir = dir,
               path = fs.combine(dir, item),
@@ -152,7 +155,7 @@ function menu:renderScrollbox()
     t.setCursorPos(1, 1)
     t.write(("%d results"):format(#programs))
 
-    self.searchLaunch = {}
+    searchLaunch = {}
 
     for i, v in pairs(programs) do
       t.setCursorPos(1, i * 3)
@@ -161,9 +164,9 @@ function menu:renderScrollbox()
       t.setCursorPos(1, i * 3 + 1)
       t.setTextColor(colors.lightGray)
       t.write(strings.ensure_width(v.dir, 14))
-      self.searchLaunch[#self.searchLaunch + 1] = {
+      searchLaunch[#searchLaunch + 1] = {
         y = i * 3,
-        path = v,
+        path = v.path,
       }
     end
   else
@@ -273,8 +276,14 @@ function menu:fire(e)
       if x >= 2 and x <= 14 and y >= self.h - 13 and y <= self.h - 5 then
         local _, sY = self.scroll:getScroll()
 
-        if self.searchContent ~= "" then
-          
+        if searchContent ~= "" then
+          for i, v in pairs(searchLaunch) do
+            if x >= 2 and x <= 14 and y >= self.h - 16 + sY + v.y and y <= self.h - 15 + sY + v.y then
+              self.wm.addProcess(v.path, {title = v.name}, true)
+              self.isMenuVisible = false
+              break
+            end
+          end
         else
           for i, v in pairs(self.registry:get("Menu.PinnedApps")) do
             if x >= 4 and x <= 3 + #v.name and y == self.h - 13 + sY + i - 1 then
@@ -294,7 +303,7 @@ function menu:fire(e)
 
         if x >= 1 and x <= 3 then
           self.searchInput:setFocused(true)
-          self.searchContent = ""
+          searchContent = ""
           self.searchInput:setContent("")
           self.isMenuVisible = not self.isMenuVisible
         else

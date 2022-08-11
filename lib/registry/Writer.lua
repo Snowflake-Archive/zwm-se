@@ -11,9 +11,9 @@ function RegistryWriter:new(name)
   local o = {}
   setmetatable(o, self)
   self.__index = self
-  self.name = name
+  o.name = name
 
-  self.data = file.readJSON("/bin/Registry/" .. name .. ".json")
+  o.data = file.readJSON("/bin/Registry/" .. name .. ".json")
   
   return o
 end

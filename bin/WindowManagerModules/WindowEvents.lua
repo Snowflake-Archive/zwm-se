@@ -20,10 +20,10 @@ function events:new(logger, buffer)
   setmetatable(o, self)
   self.__index = self
 
-  self.buffer = buffer
-  self.logger = logger
-  self.windowDraggingState = nil
-  self.windowResizingState = nil
+  o.buffer = buffer
+  o.logger = logger
+  o.windowDraggingState = nil
+  o.windowResizingState = nil
 
   return o
 end

@@ -12,10 +12,10 @@ function RegistryReader:new(name, fromDefaults)
   local o = {}
   setmetatable(o, self)
   self.__index = self
-  self.name = name
-  self.path = "/bin/Registry" .. (fromDefaults and "Defaults" or "") .. "/" .. name .. ".json"
+  o.name = name
+  o.path = "/bin/Registry" .. (fromDefaults and "Defaults" or "") .. "/" .. name .. ".json"
 
-  self.data = file.readJSON(self.path)
+  o.data = file.readJSON(o.path)
 
   return o
 end
@@ -35,6 +35,7 @@ end
 -- @return any The value of the key
 function RegistryReader:get(key)
   local children = self.data
+  local i = 1
   
   for t in key:gmatch("[^%.]+") do
     if children.folders[t] then
@@ -52,8 +53,10 @@ function RegistryReader:get(key)
 
       return children.values[t].value
     else
-      error("Key not found: " .. key)
+      error("Key not found: " .. key .. " deep " .. i)
     end
+
+    i = i + 1
   end
 end
 

@@ -139,7 +139,7 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars, visible)
     redraw = redraw,
   }
 
-  self.sbterm = sbterm
+  o.sbterm = sbterm
   
   return o
 end

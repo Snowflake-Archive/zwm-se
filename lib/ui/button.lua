@@ -4,7 +4,6 @@
 local drawing = require(".lib.utils.draw")
 local reigstryReader = require(".lib.registry.Reader")
 
-local reader = reigstryReader:new("user")
 local button = {}
 
 --- Creates a new button. The buttons width will be #text + 4.
@@ -29,6 +28,8 @@ function button:new(x, y, text, callback, disabled, visible, disablePadding, col
     visible = visible ~= false,
     disablePadding = disablePadding == true,
     colors = colors or {},
+    reader = reigstryReader:new("user"),
+
   }
 
   setmetatable(o, self)
@@ -96,21 +97,21 @@ function button:render(useBgRender)
       self.bgOnRender = term.getBackgroundColor()
     end
 
-    local color = self.colors.background or reader:get("Appearance.UserInterface.Button.Background")
+    local color = self.colors.background or self.reader:get("Appearance.UserInterface.Button.Background")
 
     if self.isBeingClicked == true then
-      color = self.colors.clicking or reader:get("Appearance.UserInterface.Button.Clicking")
+      color = self.colors.clicking or self.reader:get("Appearance.UserInterface.Button.Clicking")
     elseif self.isFocused == true then
-      color = self.colors.focused or reader:get("Appearance.UserInterface.Button.Focused")
+      color = self.colors.focused or self.reader:get("Appearance.UserInterface.Button.Focused")
     end
 
     drawing.drawBorder(self.x - 1, self.y - 1, #displayStr + 2, 3, color, "1-box")
 
     term.setCursorPos(self.x, self.y)
-    term.setBackgroundColor(self.colors.background or reader:get("Appearance.UserInterface.Button.Background"))
+    term.setBackgroundColor(self.colors.background or self.reader:get("Appearance.UserInterface.Button.Background"))
     term.setTextColor(self.disabled and 
-      (self.colors.textDisabled or reader:get("Appearance.UserInterface.Button.TextDisabled")) 
-      or (self.colors.text or reader:get("Appearance.UserInterface.Button.Text"))
+      (self.colors.textDisabled or self.reader:get("Appearance.UserInterface.Button.TextDisabled")) 
+      or (self.colors.text or self.reader:get("Appearance.UserInterface.Button.Text"))
     )
     
     term.write(displayStr)

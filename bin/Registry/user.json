@@ -51,7 +51,7 @@
               "values": {
                 "Background": { "type": "number", "value": "256" },
                 "Text": { "type": "number", "value": "32768" },
-                "TextDisabled": { "type": "number", "value": "256" },
+                "TextDisabled": { "type": "number", "value": "128" },
                 "Clicking": { "type": "number", "value": "128" },
                 "Focused": { "type": "number", "value": "8" }
               }
