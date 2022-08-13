@@ -1,5 +1,5 @@
 local events = {}
-local w, h = term.getSize()
+local _, h = term.getSize()
 
 local function redirect(process, e)
   if e[1] ~= "timer" then
@@ -13,9 +13,7 @@ local function redirect(process, e)
   coroutine.resume(process.coroutine, unpack(e))
 end
 
---- Creates a window renderr manager.
--- @return WindowRenderer The window renderer
-function events:new(logger, buffer)
+function events:new(logger, buffer, wm)
   local o = {}
   setmetatable(o, self)
   self.__index = self
@@ -24,6 +22,7 @@ function events:new(logger, buffer)
   o.logger = logger
   o.windowDraggingState = nil
   o.windowResizingState = nil
+  o.wm = wm
 
   return o
 end
@@ -35,49 +34,22 @@ function events:redirectEventsForMouse(p, e, idx)
     if e[4] == p.y then
       if e[1] == "mouse_click" then
         if e[3] >= p.x + p.w - 3 and e[3] <= p.x + p.w - 1 then
-          os.queueEvent("killProcess", idx)
+          self.wm.killProcess(idx)
         elseif e[3] >= p.x + p.w - 6 and e[3] <= p.x + p.w - 4 then
           if p.hideMaximize == true and p.hideMinimize == true then
             return
           elseif p.hideMaximize == true then
-            p.minimized = true
-            p.focused = false
+            self.wm.setProcessMinimized(idx, true)
             return true
-
           else
-            p.maxamized = not p.maxamized
-
-            if p.maxamized then
-              p.w_orig = p.w
-              p.h_orig = p.h
-              p.x_orig = p.x
-              p.y_orig = p.y
-
-              p.w = w
-              p.h = h - 1
-              p.x = 1
-              p.y = 1
-              p.window.reposition(p.x, p.y + 1, p.w, p.h - 1)
-            else
-              p.w = p.w_orig
-              p.h = p.h_orig
-              p.x = p.x_orig
-              p.y = p.y_orig
-              p.window.reposition(p.x, p.y + 1, p.w, p.h - 1)
-            end
-
-            term.redirect(p.window)
-            coroutine.resume(p.coroutine, "term_resize")
-            term.redirect(self.buffer)
-
+            self.wm.setProcessMaxamized(idx, not p.maxamized)
             return true
           end
         elseif e[3] >= p.x + p.w - 9 and e[3] <= p.x + p.w - 5 then
           if p.hideMinimize == true or p.hideMaxamize then
             return
           else
-            p.minimized = true
-            p.focused = false
+            self.wm.setProcessMinimized(idx, true)
             return true
           end
         elseif p.maxamized == false then
@@ -143,7 +115,7 @@ function events:windowDrag(e, processes)
 end
 
 function events:fire(e, processes, displayOrder)
-  w, h = self.buffer.getSize()
+  _, h = self.buffer.getSize()
   local didHitMouse = false
   local gotFocusTarget = false
   local redrawAll = false
@@ -223,10 +195,8 @@ function events:fire(e, processes, displayOrder)
 
         if v.minimized == false and e[1] == "mouse_click" and gotFocusTarget == false and didHitMouse == false then
           if e[3] >= v.x and e[3] <= v.x + v.w - 1 and e[4] >= v.y and e[4] <= v.y + v.h - 1 then
-            for _, v in pairs(processes) do
-              v.focused = false
-            end
-            v.focused = true
+            self.wm.setFocus(o, true)
+
             term.redirect(self.buffer)
             self:redirectEventsForMouse(v, e, o, i)
             term.redirect(v.window)
@@ -254,12 +224,9 @@ function events:fire(e, processes, displayOrder)
   term.redirect(self.buffer)
 
   if didHitMouse == false and e[1]:match("^mouse_%a+") and e[4] ~= h then
-    for i, v in pairs(processes) do
-      if v.focused == true then
-        table.insert(redrawWindows, i)
-        v.focused = false
-        break
-      end
+    for i in pairs(processes) do
+      self.wm.setFocus(i, false)
+      table.insert(redrawWindows, i)
     end
   end
 

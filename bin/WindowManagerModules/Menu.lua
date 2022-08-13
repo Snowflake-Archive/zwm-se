@@ -273,10 +273,17 @@ function menu:render(processes)
     self.shutdownButton:reposition(15, h - 2)
     self.scroll:reposition(2, h - 13)
     self.scroll:redraw()
+
+    self.searchInput:render()
+
+    self.shouldCursorBlink = term.getCursorBlink()
+    self.cursorBlinkX, self.cursorBlinkY = term.getCursorPos()
   else
     self.shutdownButton:setVisible(false)
     self.searchInput:setVisible(false)
   end
+
+  
 
   term.setTextColor(oldColor)
   term.setCursorPos(oldX, oldY)
@@ -313,7 +320,7 @@ function menu:fire(e)
       if y == self.h then
         for _, v in pairs(self.processPositions) do
           if x >= v.min and x <= v.max then
-            os.queueEvent("focusProcess", v.id)
+            self.wm.setFocus(v.id, true)
           end
         end
 

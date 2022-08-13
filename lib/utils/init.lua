@@ -63,7 +63,6 @@ end
 -- @tparam any val The value to check for
 function utils.tableContains(tbl, val)
   expect(1, tbl, "table")
-  expect(2, val, "any")
   
   for _, v in pairs(tbl) do
     if v == val then return true end

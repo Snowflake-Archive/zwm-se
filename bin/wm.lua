@@ -18,16 +18,46 @@ local displayOrder = {}
 local wm = {}
 
 local windowRenderer = require(".bin.WindowManagerModules.WindowRenderer"):new(logger, buffer, displayOrder, processes)
-local windowEvents = require(".bin.WindowManagerModules.WindowEvents"):new(logger, buffer)
+local windowEvents = require(".bin.WindowManagerModules.WindowEvents"):new(logger, buffer, wm)
 local menu = require(".bin.WindowManagerModules.Menu"):new(logger, buffer, wm)
 
 local userRegistry = RegistryReader:new("user")
 
 local nextProcessId = 0
-local nextRedraw = false
+local nextRedraw = true
+
+buffer.setVisible(false)
 
 xpcall(function()
   menu:init()
+
+  local function redirect(p, ...)
+    if p and p.isService == false then
+      local old = term.current()
+      term.redirect(p.window)
+      coroutine.resume(p.coroutine, ...)
+      term.redirect(old)
+    end
+  end
+
+  local function ensureDisplayOrder()
+    for i, v in pairs(processes) do
+      local hasDisplayOrder = false
+
+      for k, j in pairs(displayOrder) do
+        if j == i then
+          if hasDisplayOrder == true then
+            table.remove(displayOrder, k)
+          end
+          hasDisplayOrder = true
+        end
+      end
+
+      if hasDisplayOrder == false and v.isService ~= true and v.minimized == false then
+        table.insert(displayOrder, i)
+      end
+    end
+  end
 
   -- Window manager API
 
@@ -69,31 +99,6 @@ xpcall(function()
     return buffer.getSize()
   end
 
-  -- TODO: make this gracefully end a process, sending an "end" event to it, so the program can wrap up what it's doing / ask user to save, etc.
-  -- the process respond with an "end-receive" to ensure it supports this functionality, and "end-ready" to indiciate it's ready to be removed.
-  --local function endProcess()
-
-  --end
-
-  local function ensureDisplayOrder()
-    for i, v in pairs(processes) do
-      local hasDisplayOrder = false
-
-      for k, j in pairs(displayOrder) do
-        if j == i then
-          if hasDisplayOrder == true then
-            table.remove(displayOrder, k)
-          end
-          hasDisplayOrder = true
-        end
-      end
-
-      if hasDisplayOrder == false and v.isService ~= true and v.minimized == false then
-        table.insert(displayOrder, i)
-      end
-    end
-  end
-
   --- Creates a process
   -- @tparam string The path to launch.
   -- @tparam Options options The options for the program.
@@ -108,13 +113,13 @@ xpcall(function()
     logger:debug("Starting process %s", tostring(process))
     newProcess.isService = options.isService == true
 
+    newProcess.startedFrom = process
+
     if focused then
-      for _, v in pairs(processes) do
-        v.focused = false
+      for i in pairs(processes) do
+        wm.setFocus(i, false)
       end
     end
-
-    newProcess.startedFrom = process
 
     if options.isService ~= true then
       nextRedraw = true
@@ -236,13 +241,14 @@ xpcall(function()
 
     processes[nextProcessId] = newProcess
     nextProcessId = nextProcessId + 1
+
     return nextProcessId - 1
   end
 
+  --- Reloads window manager modules.
   function wm.reloadModules()
-    logger:info("Reloaded wm modules")
     windowRenderer = require(".bin.WindowManagerModules.WindowRenderer"):new(logger, buffer, displayOrder, processes)
-    windowEvents = require(".bin.WindowManagerModules.WindowEvents"):new(logger, buffer)
+    windowEvents = require(".bin.WindowManagerModules.WindowEvents"):new(logger, buffer, wm)
     menu = require(".bin.WindowManagerModules.Menu"):new(logger, buffer, wm)    
 
     menu:init()
@@ -259,162 +265,214 @@ xpcall(function()
       },
     }, true)
     nextRedraw = true     
+
+    logger:info("Reloaded wm modules")
+  end
+
+  --- Sets whether or not a process is minimized.
+  -- @tparam number The process id.
+  -- @tparam boolean Whether or not the process is minimized.
+  function wm.setProcessMinimized(id, minimized)
+    expect(1, id, "number")
+    expect(2, minimized, "boolean")
+
+    if processes[id].minimized ~= minimized then
+      wm.setFocus(id, false)
+      processes[id].minimized = minimized
+      nextRedraw = true
+
+      redirect(processes[id], "wm_minimized_changed", processes[id].minimized)
+    end
+  end
+
+  --- Sets whether or not a process is minimized.
+  -- @tparam number The process id.
+  -- @tparam boolean Whether or not the process is minimized.
+  function wm.setProcessMaxamized(id, maxamized)
+    expect(1, id, "number")
+    expect(2, maxamized, "boolean")
+    local p = processes[id]
+
+    p.maxamized = maxamized
+
+    if p.maxamized then
+      p.w_orig = p.w
+      p.h_orig = p.h
+      p.x_orig = p.x
+      p.y_orig = p.y
+
+      p.w = w
+      p.h = h - 1
+      p.x = 1
+      p.y = 1
+      p.window.reposition(p.x, p.y + 1, p.w, p.h - 1)
+    else
+      p.w = p.w_orig
+      p.h = p.h_orig
+      p.x = p.x_orig
+      p.y = p.y_orig
+
+      p.w_orig = nil
+      p.h_orig = nil
+      p.x_orig = nil
+      p.y_orig = nil
+
+      p.window.reposition(p.x, p.y + 1, p.w, p.h - 1)
+    end
+
+    term.redirect(p.window)
+    coroutine.resume(p.coroutine, "term_resize")
+    term.redirect(buffer)
+
+    redirect(p, "wm_maxamized_changed", p.maxamized)
+
+    nextRedraw = true
+  end
+
+  --- Sets whether or not a process is focused.
+  -- @tparam number The id of the process to focus.
+  -- @tparam boolean Whether or not the process is focused.
+  function wm.setFocus(id, value)
+    expect(1, id, "number")
+    expect(2, value, "boolean")
+
+    if value == true then
+      for i, v in pairs(processes) do
+        if v.focused == true and i ~= id then
+          redirect(processes[id], "wm_focus_lost")
+          v.focused = false
+        end
+      end
+
+      wm.setProcessMinimized(id, false)
+      processes[id].focused = true
+      nextRedraw = true
+
+      redirect(processes[id], "wm_focus_gained")
+    else
+      if processes[id].focused == true then
+        redirect(processes[id], "wm_focus_lost")
+        processes[id].focused = false
+        nextRedraw = true
+      end
+    end
   end
 
   -- Begin services
   wm.addProcess("/bin/Services/ServiceWorker.lua", {isService = true})
 
-  parallel.waitForAny(
-    function()
-      -- Event loop
-      while true do
-        local e = {os.pullEvent()}
-        local needsRedraw = false
+  while true do
+    local e = {os.pullEvent()}
+    local needsRedraw = false
 
-        -- == Events == --
+    -- == Events == --
 
-        if e[1] == "term_resize" then
-          local nW, nH = native.getSize()
-          w, h = nW, nH
-          buffer.reposition(1, 1, w, h)
-          logger:info("Resized to %d x %d", w, h)
-          needsRedraw = true
-        elseif e[1] == "launchProgram" then
-          -- e[2]: id for message
-          -- e[3]: path/func
-          -- e[4]: options
-          -- e[5]: focused
-          local id = wm.addProcess(e[3], e[4], e[5])
-          table.insert(displayOrder, 1, id)
-          needsRedraw = true
+    if e[1] == "term_resize" then
+      local nW, nH = native.getSize()
+      w, h = nW, nH
+      buffer.reposition(1, 1, w, h)
+      logger:info("Resized to %d x %d", w, h)
+      needsRedraw = true
 
-          for _, v in pairs(processes) do
-            if v.window then
-              term.redirect(v.window)
-            end
-    
-            coroutine.resume(v.coroutine, "launched", e[2])
-          end
-        elseif e[1] == "getSystemLogger" then
-          for _, v in pairs(processes) do
-            if v.window then
-              term.redirect(v.window)
-            end
-    
-            coroutine.resume(v.coroutine, "gotSystemLogger", logger)
-          end
-        elseif e[1] == "focusProcess" then
-          -- e[2]: id of process to focus
-          for i, v in pairs(processes) do
-            v.focused = false
-            if i == e[2] then
-              v.focused = true
-              v.minimized = false
-            end
-          end
-
-          table.remove(displayOrder, 1)
-          table.insert(displayOrder, 1, "")
-          displayOrder[1] = e[2]
-          needsRedraw = true
-        elseif e[1] == "killProcess" then
-          -- e[2]: id of process to kill
-          wm.killProcess(e[2])
-          needsRedraw = true
-
-        end
-
-        -- Dead Process Checking
-        for i, v in pairs(processes) do
-          if coroutine.status(v.coroutine) == "dead" then
-            wm.killProcess(i)
-            needsRedraw = true
-          end
-      
-          if v.isService and v.coroutine then
-            coroutine.resume(v.coroutine, unpack(e))
-          end
-        end
-
-        -- Fire events for menu & windows
-
-        local displayOrder2, needsRedrawFromWinEvent, redrawWindows = windowEvents:fire(e, processes, displayOrder)
-        local needsRedrawFromMenu = menu:fire(e)
-
-        -- Update displayOrder if needed, and check for redraw
-
-        displayOrder = displayOrder2
-        needsRedraw = needsRedraw or needsRedrawFromMenu or needsRedrawFromWinEvent or nextRedraw
-
-        -- == Rendering == --
-
-        local anyFocused = false
-        for _, v in pairs(processes) do
-          if v.focused then
-            anyFocused = true
-          end
-        end
-
-        if needsRedraw then
-          -- Clear screen
-          buffer.setBackgroundColor(userRegistry:get("Appearance.DesktopBackgroundColor"))
-          buffer.clear()
-
-          -- Render windows
-          ensureDisplayOrder()
-          windowRenderer:renderProcesses(processes, displayOrder)
-          local cX, cY = term.getCursorPos()
-
-          -- Render menu
-          menu:render(processes)
-          local mX, mY = term.getCursorPos()
-
-          -- Cursor blink
-          if menu.isMenuVisible == false and anyFocused == false then
-            term.setCursorBlink(false)
-          elseif menu.isMenuVisible == false and anyFocused == true then
-            term.setCursorPos(cX, cY)
-          elseif menu.isMenuVisible == true then
-            term.setCursorPos(mX, mY)
-          end
-        elseif #redrawWindows > 0 then
-          -- If windows were redrawn, then just clear the main screen area and render windows.
-          -- This could possibly be made more efficent in the future, by figuring out z-indexes and such,
-          -- but that's for the future
-          paintutils.drawFilledBox(1, 1, w, h - 1, colors.lightGray)
-          windowRenderer:renderProcesses(processes, displayOrder)
-        end
-
-        nextRedraw = false
-      end
-    end,
-    function()
-      -- Buffer (by Leveloper)
-      buffer.setVisible(false)
-      term.redirect(buffer)
-
-      while true do
-        local _, h = buffer.getSize()
-
-        for t = 0, 15 do
-          native.setPaletteColor(2 ^ t, buffer.getPaletteColor(2 ^ t))
-        end
-        
-        local cursorPos = {buffer.getCursorPos()}
-        local cursorBlink = buffer.getCursorBlink()
-        local color = buffer.getTextColor()
-        native.setCursorBlink(false)
-        for t = 1, h do
-          native.setCursorPos(1, t)
-          native.blit(buffer.getLine(t))
-        end
-        native.setCursorBlink(cursorBlink)
-        native.setCursorPos(table.unpack(cursorPos))
-        native.setTextColor(color)
-        sleep()
+      for _, v in pairs(processes) do
+        redirect(v, "wm_native_resized", w, h)
       end
     end
-  )
+
+    -- Dead Process Checking
+    for i, v in pairs(processes) do
+      if coroutine.status(v.coroutine) == "dead" then
+        wm.killProcess(i)
+        needsRedraw = true
+      end
+      
+      if v.isService and v.coroutine then
+        coroutine.resume(v.coroutine, unpack(e))
+      end
+    end
+
+    -- Fire events for menu & windows
+
+    local displayOrder2, needsRedrawFromWinEvent, redrawWindows = windowEvents:fire(e, processes, displayOrder)
+    local needsRedrawFromMenu = menu:fire(e)
+
+    -- Update displayOrder if needed, and check for redraw
+
+    displayOrder = displayOrder2
+    needsRedraw = needsRedraw or needsRedrawFromMenu or needsRedrawFromWinEvent or nextRedraw
+
+    -- == Rendering == --
+
+    local anyFocused = false
+    for _, v in pairs(processes) do
+      if v.focused then
+        anyFocused = true
+      end
+    end
+
+    if needsRedraw then
+      -- Clear screen
+      buffer.setBackgroundColor(userRegistry:get("Appearance.DesktopBackgroundColor"))
+      buffer.clear()
+
+      -- Render windows
+      ensureDisplayOrder()
+      windowRenderer:renderProcesses(processes, displayOrder)
+      local cX, cY = term.getCursorPos()
+
+      -- Render menu
+      menu:render(processes)
+      local mX, mY = term.getCursorPos()
+
+      -- Cursor blink
+      if menu.isMenuVisible == false and anyFocused == false then
+        term.setCursorBlink(false)
+      elseif menu.isMenuVisible == false and anyFocused == true then
+        term.setCursorPos(cX, cY)
+      elseif menu.isMenuVisible == true then
+        term.setCursorPos(mX, mY)
+      end
+    elseif #redrawWindows > 0 then
+      -- If windows were redrawn, then just clear the main screen area and render windows.
+      -- This could possibly be made more efficent in the future, by figuring out z-indexes and such,
+      -- but that's for the future
+      paintutils.drawFilledBox(1, 1, w, h - 1, colors.lightGray)
+      windowRenderer:renderProcesses(processes, displayOrder)
+    end
+
+    if anyFocused == false then
+      term.setCursorBlink(false)
+    end
+
+    if needsRedrawFromWinEvent or redrawWindows then
+      menu:render(processes)
+    end
+
+    if menu.shouldCursorBlink and menu.isMenuVisible then
+      term.setCursorBlink(true)
+      term.setCursorPos(menu.cursorBlinkX, menu.cursorBlinkY)
+    end
+
+    nextRedraw = false
+
+    for t = 0, 15 do
+      native.setPaletteColor(2 ^ t, buffer.getPaletteColor(2 ^ t))
+    end
+
+    -- Begin Buffer
+    term.redirect(buffer)
+    local cursorPos = {buffer.getCursorPos()}
+    local cursorBlink = buffer.getCursorBlink()
+    local color = buffer.getTextColor()
+    native.setCursorBlink(false)
+    for t = 1, h do
+      native.setCursorPos(1, t)
+      native.blit(buffer.getLine(t))
+    end
+    native.setCursorBlink(cursorBlink)
+    native.setCursorPos(table.unpack(cursorPos))
+    native.setTextColor(color)
+  end
 end, function(err)
   term.redirect(native)
   term.setCursorPos(1, 1)

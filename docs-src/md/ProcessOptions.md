@@ -1,5 +1,5 @@
 ---
-module: [kind=tables] ProcessOptions
+module: [kind=misc] ProcessOptions
 ---
 
 A table containing options to start a process. All values below are optional, and do have defaults.

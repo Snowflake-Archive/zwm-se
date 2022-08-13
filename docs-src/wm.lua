@@ -27,4 +27,22 @@ function wm.getSize() end
 -- @see ProcessOptions
 function wm.addProcess() end
 
+--- Reloads all system modules
+function wm.reloadModules() end
+
+--- Sets whether or not a process is minimized.
+-- @tparam number The process id.
+-- @tparam boolean Whether or not the process is minimized.
+function wm.setProcessMinimized() end
+
+--- Sets whether or not a process is minimized.
+-- @tparam number The process id.
+-- @tparam boolean Whether or not the process is minimized.
+function wm.setProcessMaxamized() end
+
+--- Sets whether or not a process is focused.
+-- @tparam number The id of the process to focus.
+-- @tparam boolean Whether or not the process is focused.
+function wm.setFocus() end
+
 return wm

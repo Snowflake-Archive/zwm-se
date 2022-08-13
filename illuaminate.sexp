@@ -20,7 +20,7 @@
     (utils Utilities)
     (registry Registry)
     (ui UI)
-    (tables Tables)
+    (misc Miscellaneous)
     (deprecated Deprecated)
   )
 
