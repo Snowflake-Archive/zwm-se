@@ -44,6 +44,15 @@
             "ApplicationTextStrong": { "type": "number", "value": "32768" }
           }
         },
+        "ShutdownMenu": {
+          "folders": {},
+          "values": {
+            "ShutdownButton": { "type": "number", "value": "16384" },
+            "ShutdownButtonText": { "type": "number", "value": "64" },
+            "RebootButton": { "type": "number", "value": "2" },
+            "RebootButtonText": { "type": "number", "value": "16" }
+          }
+        },
         "UserInterface": {
           "folders": {
             "Button": {
@@ -80,7 +89,7 @@
     "UserName": { "type": "string", "value": "User" },
     "RegistryVersion": {
       "type": "number",
-      "value": "1",
+      "value": "2",
       "overrideOnUpdate": true
     }
   }

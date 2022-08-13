@@ -29,8 +29,8 @@ function events:new(logger, buffer)
 end
 
 function events:redirectEventsForMouse(p, e, idx)
-  if p.hideFrame then
-    redirect(p, {e[1], e[2], e[3] - p.x, e[4] - p.y}) 
+  if p.hideFrame == true then
+    redirect(p, {e[1], e[2], e[3] - p.x, e[4] - p.y + 1}) 
   else
     if e[4] == p.y then
       if e[1] == "mouse_click" then

@@ -116,4 +116,17 @@ function drawing.drawPixelCharacter(x, y, tl, tr, l, r, bl, br, tc, bc)
   term.setTextColor(tc)
 end
 
+--- Draws text centered.
+-- @tparam string text The text to draw.
+-- @tparam[opt] table t The terminal to draw in.
+-- @tparam[opt] number offset The offset
+function drawing.writeCentered(text, t, offset)
+  local u = t or term
+  local w = u.getSize()
+  local x = math.floor(w / 2 - #text / 2) + offset
+  local _, y = u.getCursorPos()
+  u.setCursorPos(x, y)
+  u.write(text)
+end
+
 return drawing

@@ -109,7 +109,13 @@ function menu:init()
   end, function() end, "Search...", nil, nil, false)
 
   self.shutdownButton = button:new(1, 1, "O", function()
-    self.wm.addProcess("/bin/shutdown.lua", {hideFrame = true, isCentered = true}, true)
+    self.wm.addProcess("/bin/shutdown.lua", {
+      hideFrame = true, 
+      w = 24, 
+      h = 9, 
+      isCentered = true,
+      title = "Power",
+    }, true)
     self:setMenuVisible(false)
   end, nil, false, true, {
     background = self.registry:get("Appearance.Menu.ShutdownBackground"),

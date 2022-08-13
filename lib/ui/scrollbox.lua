@@ -101,7 +101,7 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars, visible)
       scrollWin.clear()
       o.scrollX = o.scrollX + (x or 0)
       o.scrollY = o.scrollY + (-y or 0)
-      redraw()
+      if o.visible then redraw() end
     end,
     getCursorPos = scrollWin.getCursorPos,
     setCursorPos = scrollWin.setCursorPos,
