@@ -358,6 +358,14 @@ xpcall(function()
     end
   end
 
+  --- Sets the title of a process.
+  function wm.setProcessTitle(id, title)
+    expect(1, id, "number")
+    expect(2, title, "string")
+    processes[id].title = title
+    nextRedraw = true
+  end
+
   -- Begin services
   wm.addProcess("/bin/Services/ServiceWorker.lua", {isService = true})
 

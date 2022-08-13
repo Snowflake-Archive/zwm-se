@@ -3,6 +3,8 @@ local input = require(".lib.ui.input")
 local focusableEventManager = require(".lib.ui.focusableEventManager")
 local events = require(".lib.events")
 
+_ENV.wm.setProcessTitle(_ENV.wm.id, "Run")
+
 local w, h = term.getSize()
 
 local manager = events:new()
@@ -59,5 +61,4 @@ render()
 while true do
   local e = {os.pullEvent()}
   focusableManager:check(e)
-
 end

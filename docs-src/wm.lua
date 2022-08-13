@@ -45,4 +45,9 @@ function wm.setProcessMaxamized() end
 -- @tparam boolean Whether or not the process is focused.
 function wm.setFocus() end
 
+--- Sets the title of a window.
+-- @tparam number The id of the window.
+-- @tparam string The new title.
+function wm.setTitle() end
+
 return wm

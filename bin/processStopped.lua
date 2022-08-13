@@ -16,6 +16,8 @@ if _ENV.wmProcessStopInfo then
 
   local scrollboxTerm = errorInfoBox:getTerminal()
 
+  _ENV.wm.setProcessTitle(_ENV.wm.id, "Crash Report")
+
   focusableManager:addButton(okay)
   focusableManager:inject(eventManager)
   errorInfoBox:addToEventManager(eventManager)

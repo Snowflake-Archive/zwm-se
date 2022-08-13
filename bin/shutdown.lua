@@ -4,6 +4,8 @@ local reader = require(".lib.registry.Reader"):new("user")
 local events = require('.lib.events'):new()
 local focusableEventManager = require('.lib.ui.focusableEventManager'):new()
 
+local focused = true
+
 local shutdown = buttonManager:new(3, 4, "Shutdown", function() 
   os.shutdown()
 end, nil, nil, nil, {
@@ -31,7 +33,7 @@ local function render()
   local w, h = term.getSize()
   term.setBackgroundColor(reader:get("Appearance.Application.ApplicationBackground"))
   term.clear()
-  drawUtils.drawBorder(1, 1, w, h, reader:get("Appearance.Window.WindowFocused"), "1-box-outside")
+  drawUtils.drawBorder(1, 1, w, h, focused and reader:get("Appearance.Window.WindowFocused") or reader:get("Appearance.Window.WindowUnfocused"), "1-box-outside")
 
   term.setCursorPos(1, 2)
   term.setTextColor(reader:get("Appearance.Application.ApplicationTextStrong"))
@@ -43,6 +45,16 @@ local function render()
 end
 
 events:addListener("term_resize", render)
+
+events:addListener("wm_focus_gained", function()
+  focused = true
+  render()
+end)
+
+events:addListener("wm_focus_lost", function()
+  focused = false
+  render()
+end)
 
 render()
 
