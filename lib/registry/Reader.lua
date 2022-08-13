@@ -4,11 +4,15 @@
 local RegistryReader = {}
 
 local file = require(".lib.utils.file")
+local expect = require("cc.expect").expect
 
 --- Creates a new RegistryReader.
 -- @tparam string name The name of the registry file
 -- @tparam boolean fromDefaults If this is true, the registry will be read from the defaults folder
 function RegistryReader:new(name, fromDefaults)
+  expect(1, name, "string")
+  expect(2, fromDefaults, "boolean", "nil")
+
   local o = {}
   setmetatable(o, self)
   self.__index = self
@@ -23,6 +27,8 @@ end
 --- Reloads the registry.
 -- @tparam[opt] table data If this is provided, data will be read from the table instead of the file
 function RegistryReader:reload(data)
+  expect(1, data, "table", "nil")
+
   if data then
     self.data = data
   else
@@ -34,6 +40,8 @@ end
 -- @tparam string key The key to read. This is in compressed table format (e.g. One.Two.Three)
 -- @return any The value of the key
 function RegistryReader:get(key)
+  expect(1, key, "string")
+
   local children = self.data
   local i = 1
   
@@ -64,6 +72,8 @@ end
 -- @tparam string key The key to read. This is in compressed table format (e.g. One.Two.Three)
 -- @return string The type of the key (string, number, table or enum)
 function RegistryReader:getType(key)
+  expect(1, key, "string")
+
   local children = self.data
   
   for t in key:gmatch("[^%.]+") do
@@ -81,6 +91,8 @@ end
 -- @tparam string key The key to read. This is in compressed table format (e.g. One.Two.Three)
 -- @return table|nil The values of the enum.
 function RegistryReader:getEnum(key)
+  expect(1, key, "string")
+
   local children = self.data
   
   for t in key:gmatch("[^%.]+") do

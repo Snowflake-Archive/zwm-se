@@ -3,7 +3,9 @@
 
 local logger = {}
 
-local version = "1.0"
+local expect = require("cc.expect").expect
+
+local version = "1.1"
 
 local lookup = {
   debug = "DBUG",
@@ -17,6 +19,8 @@ local lookup = {
 -- @tparam boolean debug If debugging is enabled or not
 -- @return table The logger
 function logger:new(debug)
+  expect(1, debug, "boolean", "nil")
+
   local o = {}
   setmetatable(o, self)
   self.__index = self
@@ -39,6 +43,9 @@ end
 -- @tparam string message The message to log
 -- @tparam any ... Extra arguments to pass to string.format
 function logger:log(type, message, ...)
+  expect(1, type, "string")
+  expect(2, message, "string")
+  
   if self.isDebug == false and type == "debug" then return end
   local fmsg = message
 
@@ -65,6 +72,8 @@ end
 -- @tparam string message The message to log
 -- @tparam any ... Extra arguments to pass to string.format
 function logger:debug(message, ...)
+  expect(1, message, "string")
+
   self:log("debug", message, ...)
 end
 
@@ -72,6 +81,8 @@ end
 -- @tparam string message The message to log
 -- @tparam any ... Extra arguments to pass to string.format
 function logger:info(message, ...)
+  expect(1, message, "string")
+
   self:log("info", message, ...)
 end
 
@@ -79,6 +90,8 @@ end
 -- @tparam string message The message to log
 -- @tparam any ... Extra arguments to pass to string.format
 function logger:warn(message, ...)
+  expect(1, message, "string")
+
   self:log("warm", message, ...)
 end
 
@@ -86,6 +99,8 @@ end
 -- @tparam string message The message to log
 -- @tparam any ... Extra arguments to pass to string.format
 function logger:error(message, ...)
+  expect(1, message, "string")
+
   self:log("error", message, ...)
 end
 
@@ -93,12 +108,16 @@ end
 -- @tparam string message The message to log
 -- @tparam any ... Extra arguments to pass to string.format
 function logger:critical(message, ...)
+  expect(1, message, "string")
+
   self:log("critical", message, ...)
 end
 
 --- Dumps logs.
 -- @tparam string file The file to dump to
 function logger:dump(file)
+  expect(1, file, "string")
+  
   self:info("Logs dumped to " .. file)
   local f = fs.open(file, "w")
   f.write(self.linesText)

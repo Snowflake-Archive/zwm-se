@@ -3,6 +3,7 @@
 
 local drawing = require(".lib.utils.draw")
 local reigstryReader = require(".lib.registry.Reader")
+local expect = require("cc.expect").expect
 
 local button = {}
 
@@ -17,6 +18,15 @@ local button = {}
 -- @tparam[opt] table colors A table for colors, background, clicking, focused, text, and textDisabled 
 -- @return Button The new button.
 function button:new(x, y, text, callback, disabled, visible, disablePadding, colors)
+  expect(1, x, "number")
+  expect(2, y, "number")
+  expect(3, text, "string")
+  expect(4, callback, "function")
+  expect(5, disabled, "boolean", "nil")
+  expect(6, visible, "boolean", "nil")
+  expect(7, disablePadding, "boolean", "nil")
+  expect(8, colors, "table", "nil")
+
   local o = {
     x = x,
     y = y,
@@ -42,6 +52,9 @@ end
 -- @tparam number x The X position to move the button to.
 -- @tparam number y The Y position to move the button to.
 function button:reposition(x, y)
+  expect(1, x, "number")
+  expect(2, y, "number")
+
   self.x = x 
   self.y = y
 end
@@ -49,6 +62,8 @@ end
 --- Sets the text of a button.
 -- @tparam string text The new text of the button.
 function button:setText(text)
+  expect(1, text, "string")
+
   self.text = text
   self:render(true)
 end
@@ -56,6 +71,8 @@ end
 --- Sets whether or not the button is disabled. If this is true, the button will be greyed out and not selectable.
 -- @tparam boolean disabled Whether the button is disabled or not.
 function button:setDisabled(disabled)
+  expect(1, disabled, "boolean")
+
   self.disabled = disabled == true
   self:render(true)
 end
@@ -63,6 +80,8 @@ end
 --- Sets whether or not the button is visible. Note that the whole screen will need to be re-rendered to make the button disappear.
 -- @tparam boolean visible Whether or not the button is disabled.
 function button:setVisible(visible)
+  expect(1, visible, "boolean")
+
   self.visible = visible == true
   self:render(true)
 end
@@ -70,6 +89,8 @@ end
 --- Sets whether or not the button is focused.
 -- @tparam boolean focused Whether or not the button is focused.
 function button:setFocused(focused)
+  expect(1, focused, "boolean")
+
   local oldValue = self.isFocused
   local newValue = focused == true
 
@@ -82,6 +103,8 @@ end
 --- Renders the button.
 -- @tparam[opt] boolean useBgRender If this is true, the button will be rendered with the same background color used to render it last time.
 function button:render(useBgRender)
+  expect(1, useBgRender, "boolean", "nil")
+
   if self.visible == true then
     local oX, oY = term.getCursorPos()
 
@@ -126,6 +149,8 @@ end
 --- Clicks a button.
 -- @tparam[opt] boolean isFirst This is used for clicking with the mouse, mouse_click will make this true.  
 function button:click(isFirst)
+  expect(1, isFirst, "boolean", "nil")
+
   if isFirst == true then
     self.isBeingClicked = true
     self:render(true)

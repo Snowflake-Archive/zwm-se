@@ -2,6 +2,7 @@
 -- @module[kind=utils] MiscUtils
 
 local utils = {}
+local expect = require("cc.expect").expect
 
 --- Gets a drawing character from the cells that are set to true.
 -- @tparam boolean tl Draw top left cell.
@@ -11,6 +12,13 @@ local utils = {}
 -- @tparam boolean bl Draw bottom left cell.
 -- @tparam boolean br Draw bottom right cell.
 function utils.getPixelChar(tl, tr, l, r, bl, br)
+  expect(1, tl, "boolean")
+  expect(2, tr, "boolean")
+  expect(3, l, "boolean")
+  expect(4, r, "boolean")
+  expect(5, bl, "boolean")
+  expect(6, br, "boolean")
+
   local data = 128
   if not br then
     data = data + (tl and 1 or 0)
@@ -34,6 +42,9 @@ end
 -- @tparam string blit The blit string to pull from
 -- @return number The color
 function utils.selectXfromBlit(x, blit)
+  expect(1, x, "number")
+  expect(2, blit, "string")
+
   return blit:sub(x, x)
 end
 
@@ -51,6 +62,9 @@ end
 -- @tparam table tbl The table to check
 -- @tparam any val The value to check for
 function utils.tableContains(tbl, val)
+  expect(1, tbl, "table")
+  expect(2, val, "any")
+  
   for _, v in pairs(tbl) do
     if v == val then return true end
   end

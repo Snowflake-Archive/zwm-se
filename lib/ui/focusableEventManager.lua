@@ -1,6 +1,8 @@
 --- An event manager to be used with inputs and buttons.
 -- @module[kind=ui] FocusableEventManager
 
+local expect = require("cc.expect").expect
+
 local focusableEventManager = {}
 
 --- Creates a new FocusableEventManager.
@@ -19,6 +21,8 @@ end
 --- Adds a button to the event manager.
 -- @tparam Button button The button to add.
 function focusableEventManager:addButton(object)
+  expect(1, object, "table")
+
   table.insert(self.objects, {
     type = "button",
     o = object,
@@ -28,6 +32,8 @@ end
 --- Adds an input to the event manager.
 -- @tparam Input input The input to add.
 function focusableEventManager:addInput(object)
+  expect(1, object, "table")
+
   table.insert(self.objects, {
     type = "input",
     o = object,
@@ -37,6 +43,8 @@ end
 --- Checks events.
 -- @tparam table e The event.
 function focusableEventManager:check(e)
+  expect(1, e, "table")
+
   if e[1] == "mouse_click" then
     local m, x, y = e[2], e[3], e[4]
     for _, v in pairs(self.objects) do
@@ -91,6 +99,8 @@ end
 --- Injects the event manager into the event manager.
 -- @tparam EventManager manager The event manager to inject into.
 function focusableEventManager:inject(manager)
+  expect(1, manager, "table")
+
   manager:addListener("mouse_click", function(...) self:check({"mouse_click", ...}) end)
   manager:addListener("mouse_up", function(...) self:check({"mouse_up", ...}) end)
   manager:addListener("key", function(...) self:check({"key", ...}) end)

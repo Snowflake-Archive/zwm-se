@@ -3,6 +3,7 @@
 
 local drawing = {}
 local utils = require(".lib.utils")
+local expect = require("cc.expect").expect
 
 --- Draws a border around something.
 -- 1-box will render a 1-pixel border on the inside.
@@ -14,6 +15,13 @@ local utils = require(".lib.utils")
 -- @tparam number color The color of the border
 -- @tparam string style The style to render in. The only available style is 1-box
 function drawing.drawBorder(x, y, w, h, color, style)
+  expect(1, x, "number")
+  expect(2, y, "number")
+  expect(3, w, "number")
+  expect(4, h, "number")
+  expect(5, color, "number")
+  expect(6, style, "string")
+
   if style == "1-box" then
     local bg = term.getBackgroundColor()
 
@@ -100,6 +108,17 @@ end
 -- @tparam number tc Foreground color
 -- @tparam number bc Background color
 function drawing.drawPixelCharacter(x, y, tl, tr, l, r, bl, br, tc, bc)
+  expect(1, x, "number")
+  expect(2, y, "number")
+  expect(3, tl, "boolean")
+  expect(4, tr, "boolean")
+  expect(5, l, "boolean")
+  expect(6, r, "boolean")
+  expect(7, bl, "boolean")
+  expect(8, br, "boolean")
+  expect(9, tc, "number")
+  expect(10, bc, "number")
+
   term.setCursorPos(x, y)
   local char, invert = utils.getPixelChar(tl, tr, l, r, bl, br)
 
@@ -121,6 +140,10 @@ end
 -- @tparam[opt] table t The terminal to draw in.
 -- @tparam[opt] number offset The offset
 function drawing.writeCentered(text, t, offset)
+  expect(1, text, "string")
+  expect(2, t, "table", "nil")
+  expect(3, offset, "number", "nil")
+
   local u = t or term
   local w = u.getSize()
   local x = math.floor(w / 2 - #text / 2) + offset

@@ -2,6 +2,7 @@
 -- @module[kind=ui] Scrollbox
 
 local scrollbox = {}
+local expect = require("cc.expect").expect
 
 --- Creates a scrollbox frame.
 -- @tparam number x The X position of the scrollbox frame.
@@ -13,6 +14,14 @@ local scrollbox = {}
 -- @tparam[opt] boolean visible If false, the scrollbox will not be rendered. 
 -- @return Scrollbox The created scrollbox instance.
 function scrollbox:new(x, y, w, h, parent, renderScrollbars, visible)
+  expect(1, x, "number")
+  expect(2, y, "number")
+  expect(3, w, "number")
+  expect(4, h, "number")
+  expect(5, parent, "table")
+  expect(6, renderScrollbars, "table", "nil")
+  expect(7, visible, "boolean", "nil")
+
   local newW, newH = w, h
 
   if renderScrollbars then
@@ -83,6 +92,10 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars, visible)
   end 
 
   local function blit(text, foreground, background)
+    expect(1, text, "string")
+    expect(2, foreground, "string")
+    expect(3, background, "string")
+
     local cx, cy = scrollWin.getCursorPos()
     o.maxWidth = math.max(o.maxWidth, cx + #text)
     o.maxHeight = math.max(o.maxHeight, cy)
@@ -95,9 +108,14 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars, visible)
     nativePaletteColour = scrollWin.nativePaletteColor,
     nativePaletteColor = scrollWin.nativePaletteColor,
     write = function(text)
+      expect(1, text, "string")
+
       blit(text, colors.toBlit(scrollWin.getTextColor()):rep(#text), colors.toBlit(scrollWin.getBackgroundColor()):rep(#text))
     end,
     scroll = function(y, x)
+      expect(1, y, "number")
+      expect(2, x, "number", "nil")
+
       scrollWin.clear()
       o.scrollX = o.scrollX + (x or 0)
       o.scrollY = o.scrollY + (-y or 0)
@@ -168,6 +186,8 @@ end
 --- Sets whether or not the scrollbox is visible.
 -- @tparam boolean value If true, the scrollbox will be visible.
 function scrollbox:setVisible(value)
+  expect(1, value, "boolean")
+
   self.scrollWin.setVisible(value)
   self.visible = value
 end
@@ -178,6 +198,11 @@ end
 -- @tparam number w The width of the scrollbox.
 -- @tparam number h The height of the scrollbox.
 function scrollbox:reposition(x, y, w, h)
+  expect(1, x, "number", "nil")
+  expect(2, y, "number", "nil")
+  expect(3, w, "number", "nil")
+  expect(4, h, "number", "nil")
+
   local winW = self.w
   if x then self.x = x end
   if y then self.y = y end
@@ -195,6 +220,8 @@ end
 --- Scrolls the specified delta, and ensures it can be scrolled to.
 -- @tparam number d The delta to scroll.
 function scrollbox:ensureScroll(d)
+  expect(1, d, "number")
+
   local _, sY = self:getScroll()
   local _, ssY = self.sbterm.getSize()
 
@@ -213,6 +240,10 @@ end
 -- @tparam number x The X position of the scroll.
 -- @tparam number y The Y position of the scroll.
 function scrollbox:onMouseScroll(d, x, y)
+  expect(1, d, "number")
+  expect(2, x, "number")
+  expect(3, y, "number")
+
   if x >= self.x and x <= self.x + self.w - 1 and y >= self.y and y <= self.y + self.h - 1 then
     self:ensureScroll(d)
   end
@@ -221,6 +252,8 @@ end
 --- Adds events to the specified EventManager.
 -- @tparam EventManager em The EventManager to add events to.
 function scrollbox:addToEventManager(eventManager)
+  expect(1, eventManager, "table")
+
   local function onBarScroll(y)
     local newY = y - self.y - 1
     local min = self.y + 1

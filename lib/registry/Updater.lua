@@ -1,11 +1,16 @@
 --- A standalone function for updating a registry.
 -- @module[kind=registry] Updater
 
+local expect = require("cc.expect").expect
+
 --- Updates a registry
 -- @tparam table from The registry to read from
 -- @tparam table to The registry to write to
 -- @return The new table
 return function(old, new)
+  expect(1, old, "table")
+  expect(1, new, "table")
+
   local function readFolder(old, new)
     local value = {
       values = {},

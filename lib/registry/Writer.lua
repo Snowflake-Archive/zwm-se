@@ -2,12 +2,15 @@
 -- @module[kind=registry] Writer
 
 local file = require(".lib.utils.file")
+local expect = require("cc.expect").expect
 
 local RegistryWriter = {}
 
 --- Creates a new RegistryWriter.
 -- @tparam string name The name of the registry file
 function RegistryWriter:new(name)
+  expect(1, name, "string")
+
   local o = {}
   setmetatable(o, self)
   self.__index = self
@@ -23,6 +26,9 @@ end
 -- @tparam any value The value to set
 -- @return The updated table.
 function RegistryWriter:set(key, value)
+  expect(1, key, "string")
+  expect(2, value, "any")
+
   local children = self.data
 
   local t = children

@@ -293,7 +293,7 @@ function menu:fire(e)
         local _, sY = self.scroll:getScroll()
 
         if searchContent ~= "" then
-          for i, v in pairs(searchLaunch) do
+          for _, v in pairs(searchLaunch) do
             if x >= 2 and x <= 14 and y >= self.h - 16 + sY + v.y and y <= self.h - 15 + sY + v.y then
               self.wm.addProcess(v.path, {title = v.name}, true)
               self.isMenuVisible = false

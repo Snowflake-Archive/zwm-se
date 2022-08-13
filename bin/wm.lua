@@ -2,6 +2,7 @@
 local logger = require(".lib.log")
 local RegistryReader = require(".lib.Registry.Reader")
 
+local expect = require("cc.expect").expect
 local makePackage = dofile("rom/modules/main/cc/require.lua").make
 
 local log = logger:new(false)
@@ -39,6 +40,8 @@ xpcall(function()
   --- Kills a process with the specified ID.
   -- @tparam number id The ID.
   function wm.killProcess(idx)
+    expect(1, idx, "number")
+    
     local p = processes[idx]
     p.coroutine = nil
     processes[idx] = nil
@@ -92,10 +95,14 @@ xpcall(function()
   end
 
   --- Creates a process
-  -- @tparam string|function The path/function to launch. Note that functions are not well supported.
+  -- @tparam string The path to launch.
   -- @tparam Options options The options for the program.
   -- @tparam[opt] boolean focused Whether or not the process will be focused when it is started
   function wm.addProcess(process, options, focused)
+    expect(1, process, "string")
+    expect(2, options, "table")
+    expect(3, focused, "boolean", "nil")
+
     local newProcess = {}
 
     logger:debug("Starting process %s", tostring(process))
@@ -107,9 +114,7 @@ xpcall(function()
       end
     end
 
-    if type(process) == "string" then
-      newProcess.startedFrom = process
-    end
+    newProcess.startedFrom = process
 
     if options.isService ~= true then
       nextRedraw = true
@@ -161,77 +166,73 @@ xpcall(function()
       newProcess.window = w
     end
 
-    if type(process) == "function" then
-      newProcess.coroutine = coroutine.create(process)
-    else
-      newProcess.coroutine = coroutine.create(function()
-        logger:info("Started process %s", process)
-        local path = process
-        local endedGracefully = false
+    newProcess.coroutine = coroutine.create(function()
+      logger:info("Started process %s", process)
+      local path = process
+      local endedGracefully = false
 
-        xpcall(function()
-          if fs.exists(path) then
-            local f = fs.open(path, "r")
-            local data = f.readAll()
-            f.close()
+      xpcall(function()
+        if fs.exists(path) then
+          local f = fs.open(path, "r")
+          local data = f.readAll()
+          f.close()
 
-            local f = load(data, "in " .. (newProcess.title or process))
+          local f = load(data, "in " .. (newProcess.title or process))
 
-            if f then
-              local env = _ENV
-              env.shell = shell
-              env.require, env.package = makePackage(env, "/")
-              env.wm = wm
-              env.wm.id = nextProcessId - 1
+          if f then
+            local env = _ENV
+            env.shell = shell
+            env.require, env.package = makePackage(env, "/")
+            env.wm = wm
+            env.wm.id = nextProcessId - 1
 
-              if options.env then
-                for i, v in pairs(options.env) do
-                  if not env[i] then
-                    env[i] = v
-                  end
+            if options.env then
+              for i, v in pairs(options.env) do
+                if not env[i] then
+                  env[i] = v
                 end
               end
-
-              setfenv(f, env)
-              f()
-              endedGracefully = true
             end
-          else
-            wm.addProcess("/bin/Prompts/Error.lua", {
-              isCentered = true,
-              w = 32,
-              h = 9,
-              hideMinimize = true,
-              hideMaximize = true,
-              title = "Error",
-              env = {
-                errorText = "The requested path, " .. process .. ", does not exist.",
-              },
-            })
+
+            setfenv(f, env)
+            f()
+            endedGracefully = true
           end
-        end, function(stop)
-          if endedGracefully == false then
-            local trace = debug.traceback()
-            logger:error("Process %s ended: \n%s %s", path, stop, trace)
-            wm.addProcess("/bin/processStopped.lua", {
-              env = {
-                wmProcessStopInfo = {
-                  name = newProcess.title or "",
-                  error = stop,
-                  traceback = trace,
-                },
+        else
+          wm.addProcess("/bin/Prompts/Error.lua", {
+            isCentered = true,
+            w = 32,
+            h = 9,
+            hideMinimize = true,
+            hideMaximize = true,
+            title = "Error",
+            env = {
+              errorText = "The requested path, " .. process .. ", does not exist.",
+            },
+          })
+        end
+      end, function(stop)
+        if endedGracefully == false then
+          local trace = debug.traceback()
+          logger:error("Process %s ended: \n%s %s", path, stop, trace)
+          wm.addProcess("/bin/processStopped.lua", {
+            env = {
+              wmProcessStopInfo = {
+                name = newProcess.title or "",
+                error = stop,
+                traceback = trace,
               },
-              isCentered = true,
-              w = 30,
-              h = 14,
-              title = "Crash Report",
-              hideMaximize = true,
-              hideMinimize = true,
-            }, true)
-          end
-        end)
+            },
+            isCentered = true,
+            w = 30,
+            h = 14,
+            title = "Crash Report",
+            hideMaximize = true,
+            hideMinimize = true,
+          }, true)
+        end
       end)
-    end
+    end)
 
     processes[nextProcessId] = newProcess
     nextProcessId = nextProcessId + 1
