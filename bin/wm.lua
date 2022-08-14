@@ -232,8 +232,6 @@ xpcall(function()
             w = 30,
             h = 14,
             title = "Crash Report",
-            hideMaximize = true,
-            hideMinimize = true,
           }, true)
         end
       end)

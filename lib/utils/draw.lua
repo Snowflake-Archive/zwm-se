@@ -58,6 +58,41 @@ function drawing.drawBorder(x, y, w, h, color, style)
     term.write(bottomDrawChar:rep(w - 2))
 
     drawing.drawPixelCharacter(x + w - 1, y + h - 1, true, false, false, false, false, false, color, bg)
+  elseif style == "2-box" or style == "2-box-dropdown" then
+    local bg = term.getBackgroundColor()
+
+    if style == "2-box" then
+      -- Top Line
+
+      drawing.drawPixelCharacter(x, y, false, false, true, true, true, true, color, bg)
+      
+      local topDrawChar = utils.getPixelChar(false, false, true, true, true, true)
+      term.setBackgroundColor(color)
+      term.setTextColor(bg)
+      term.write(topDrawChar:rep(w - 2))
+
+      drawing.drawPixelCharacter(x + w - 1, y, false, false, true, true, true, true, color, bg)
+    end
+
+    term.setBackgroundColor(color)
+
+    -- Sides
+    for i = 1, h - 2 do
+      term.setCursorPos(x, y + i)
+      term.write(" ")
+      term.setCursorPos(x + w - 1, y + i)
+      term.write(" ")
+    end
+
+    drawing.drawPixelCharacter(x, y + h - 1, true, true, true, true, false, false, color, bg)
+    
+    local bottomDrawChar = utils.getPixelChar(true, true, true, true, false, false)
+    term.setBackgroundColor(bg)
+    term.setTextColor(color)
+    term.setCursorPos(x + 1, y + h - 1)
+    term.write(bottomDrawChar:rep(w - 2))
+
+    drawing.drawPixelCharacter(x + w - 1, y + h - 1, true, true, true, true, false, false, color, bg)
   elseif style == "1-box-outside" then
     local bg = term.getBackgroundColor()
 
