@@ -13,7 +13,7 @@ local expect = require("cc.expect").expect
 -- @tparam number w The width of the border
 -- @tparam number h The height of the border
 -- @tparam number color The color of the border
--- @tparam string style The style to render in. The only available style is 1-box
+-- @tparam string style The style to render in, 1-box, 2-box, 2-box-dropdown, 1-box-outside
 function drawing.drawBorder(x, y, w, h, color, style)
   expect(1, x, "number")
   expect(2, y, "number")
