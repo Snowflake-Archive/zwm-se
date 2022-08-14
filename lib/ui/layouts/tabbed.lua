@@ -7,17 +7,21 @@ local expect = require("cc.expect").expect
 --- Creates a new Tabbed Layout.
 -- @tparam table tabs A table of tabs.
 -- @tparam[opt] number selectedTab The index of the selected tab.
+-- @tparam[opt] number y The Y position of the layout.
 -- @return TabbedLayout The new tabbed layout.
-function tabbedLayout:new(tabs, selectedTab)
+function tabbedLayout:new(tabs, selectedTab, y)
   expect(1, tabs, "table")
   expect(2, selectedTab, "number", "nil")
+  expect(3, y, "number", "nil")
+
+  local y = y or 1
 
   local windows = {}
   local native = term.current()
   local w, h = native.getSize()
 
-  for i, v in pairs(tabs) do
-    windows[i] = window.create(native, 1, 2, w, h - 1, false)
+  for i in pairs(tabs) do
+    windows[i] = window.create(native, 1, y, w, h - y, false)
 
     if selectedTab == i then
       windows[i].setVisible(true)
