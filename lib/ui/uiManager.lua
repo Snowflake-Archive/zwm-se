@@ -123,13 +123,17 @@ local function fireContextMenuEvents(o, e, hasContextMenuVisible)
 end
 
 --- Creates a new UIManager.
+-- @tparam number xOffset X offset for mouse events
+-- @tparam number yOffset Y offset for mouse events
 -- @return UIManager The event manager.
-function uiManager:new()
+function uiManager:new(xOffset, yOffset)
   local o = {
     buttons = {},
     inputs = {},
     contextMenus = {},
     id = math.random(1, 10 ^ 10),
+    xOffset = xOffset or 0,
+    yOffset = yOffset or 0,
   }
 
   setmetatable(o, self)
@@ -167,6 +171,11 @@ end
 function uiManager:check(e)
   expect(1, e, "table")
 
+  if e[1] == "mouse_click" or e[1] == "mouse_drag" or e[1] == "mouse_up" then
+    e[3] = e[3] + self.xOffset
+    e[4] = e[4] + self.yOffset
+  end
+
   fireButtonEvents(self.buttons, e)
   fireInputEvents(self.inputs, e)
   self.hasContextMenuVisible = fireContextMenuEvents(self.contextMenus, e, self.hasContextMenuVisible)
@@ -177,9 +186,10 @@ end
 function uiManager:inject(manager)
   expect(1, manager, "table")
 
-  manager:addListener("mouse_click", function(...) self:check({"mouse_click", ...}) end)
-  manager:addListener("mouse_drag", function(...) self:check({"mouse_drag", ...}) end)
-  manager:addListener("mouse_up", function(...) self:check({"mouse_up", ...}) end)
+  manager:addListener("mouse_click", function(...) self:check({...}) end)
+  manager:addListener("mouse_drag", function(...) self:check({...}) end)
+  manager:addListener("mouse_up", function(...) self:check({...}) end)
+
   manager:addListener("key", function(...) self:check({"key", ...}) end)
   manager:addListener("char", function(...) self:check({"char", ...}) end)
 end
