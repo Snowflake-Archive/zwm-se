@@ -9,12 +9,12 @@ local drawUtils = require(".lib.utils.draw")
 
 --- Creates a new context menu.
 -- @tparam table objects The objects to add to the context menu.
--- @tparam table triggerMethod A table used to describe how the context menu will be triggered.
+-- @tparam[opt] table triggerMethod A table used to describe how the context menu will be triggered.
 -- @tparam[opt] table colors The colors to use in the context menu.
 -- @tparam[opt] boolean dropdownStyle If true, the top of the context menu will be chopped off.
 function contextMenu:new(objects, triggerMethod, colors, dropdownStyle)
   expect(1, objects, "table")
-  expect(2, triggerMethod, "table")
+  expect(2, triggerMethod, "table", "nil")
   expect(3, colors, "table", "nil")
   expect(4, dropdownStyle, "boolean", "nil")
 
@@ -79,8 +79,10 @@ function contextMenu:render(x, y, objectsOnly, selected)
     paintutils.drawFilledBox(x, y, x + maxLength - 1, y + #self.objects - 1, colors.lightGray)
     self.visible = true
 
-    self:render(nil, nil, true)
+    self:render(nil, nil, true, selected)
   end
+
+  if selected then self.selected = selected end
 end
 
 --- Sets the objects of the context menu.
@@ -100,7 +102,7 @@ end
 --- Hides the context menu.
 function contextMenu:hide()
   self.visibleObjects = {}
-  self.isVisible = false
+  self.visible = false
 end
 
 return contextMenu

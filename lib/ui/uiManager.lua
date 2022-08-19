@@ -6,7 +6,7 @@ local expect = require("cc.expect").expect
 local uiManager = {}
 
 -- Button Events
-local function fireButtonEvents(o, e)
+local function fireButtonEvents(id, o, e)
   if e[1] == "mouse_click" then
     local m, x, y = e[2], e[3], e[4]
 
@@ -42,7 +42,7 @@ local function fireButtonEvents(o, e)
 end
 
 -- Input Events
-local function fireInputEvents(o, e)
+local function fireInputEvents(id, o, e)
   if e[1] == "mouse_click" then
     local m, x, y = e[2], e[3], e[4]
 
@@ -70,15 +70,14 @@ local function fireInputEvents(o, e)
 end
 
 -- Context Menu Events
-local function fireContextMenuEvents(o, e, hasContextMenuVisible)
+local function fireContextMenuEvents(id, o, e, hasContextMenuVisible)
   if e[1] == "mouse_click" or e[1] == "mouse_drag" or e[1] == "mouse_up" then
     local m, x, y = e[2], e[3], e[4]
 
     if hasContextMenuVisible == nil and e[1] == "mouse_click" then
       for i, v in pairs(o) do
-        if v.triggerMethod.type == "rightClick" and m == 2 then
+        if v.triggerMethod and v.triggerMethod.type == "rightClick" and m == 2 then
           v:render(x + 1, y + 1)
-          v.isVisible = true
           return i
         end
       end
@@ -106,14 +105,14 @@ local function fireContextMenuEvents(o, e, hasContextMenuVisible)
               end
               
               menu:hide()
-              os.queueEvent("ui_manager_redraw")
+              os.queueEvent("ui_manager_redraw", id)
               return nil
             end
           end
         end
       else
         menu:hide()
-        os.queueEvent("ui_manager_redraw")
+        os.queueEvent("ui_manager_redraw", id)
         return nil
       end
     end
@@ -140,6 +139,11 @@ function uiManager:new(xOffset, yOffset)
   self.__index = self
 
   return o
+end
+
+--- Gets the ID of the UI manager's instance.
+function uiManager:getID()
+  return self.id
 end
 
 --- Adds a button to the event manager.
@@ -176,9 +180,9 @@ function uiManager:check(e)
     e[4] = e[4] + self.yOffset
   end
 
-  fireButtonEvents(self.buttons, e)
-  fireInputEvents(self.inputs, e)
-  self.hasContextMenuVisible = fireContextMenuEvents(self.contextMenus, e, self.hasContextMenuVisible)
+  fireButtonEvents(self.id, self.buttons, e)
+  fireInputEvents(self.id, self.inputs, e)
+  self.hasContextMenuVisible = fireContextMenuEvents(self.id, self.contextMenus, e, self.hasContextMenuVisible)
 end
 
 --- Injects the event manager into the event manager.
@@ -186,9 +190,9 @@ end
 function uiManager:inject(manager)
   expect(1, manager, "table")
 
-  manager:addListener("mouse_click", function(...) self:check({...}) end)
-  manager:addListener("mouse_drag", function(...) self:check({...}) end)
-  manager:addListener("mouse_up", function(...) self:check({...}) end)
+  manager:addListener("mouse_click", function(...) self:check({"mouse_click", ...}) end)
+  manager:addListener("mouse_drag", function(...) self:check({"mouse_drag", ...}) end)
+  manager:addListener("mouse_up", function(...) self:check({"mouse_up", ...}) end)
 
   manager:addListener("key", function(...) self:check({"key", ...}) end)
   manager:addListener("char", function(...) self:check({"char", ...}) end)
