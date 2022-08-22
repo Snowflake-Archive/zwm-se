@@ -50,4 +50,7 @@ function wm.setFocus() end
 -- @tparam string The new title.
 function wm.setTitle() end
 
+--- A variable that stores the time the window manager was started.
+wm.started = 0
+
 return wm

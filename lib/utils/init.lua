@@ -4,6 +4,8 @@
 local utils = {}
 local expect = require("cc.expect").expect
 
+local floor = math.floor
+
 --- Gets a drawing character from the cells that are set to true.
 -- @tparam boolean tl Draw top left cell.
 -- @tparam boolean tr Draw top right cell.
@@ -68,6 +70,36 @@ function utils.tableContains(tbl, val)
     if v == val then return true end
   end
   return false
+end
+
+--- Stringifies time into a nice, human readable format.
+-- @tparam number time The time to stringify
+-- @return string The stringified time
+function utils.stringifyTime(ms)
+  if ms < 1000 then -- milliseconds
+    return tostring(floor(ms)) .. "ms"
+  elseif ms < 60 * 1000 then -- seconds
+    return tostring(floor(ms / 1000)) .. "s"
+  elseif ms < 60 * 60 * 1000 then -- minutes
+    return tostring(floor(ms / 1000 / 60)) .. "m"
+  elseif ms < 24 * 60 * 60 * 1000 then -- hours
+    return tostring(floor(ms / 1000 / 60 / 60)) .. "h"
+  else -- days
+    return tostring(floor(ms / 1000 / 60 / 60 / 24)) .. "d"
+  end
+end
+
+--- Clones a table.
+-- @tparam table tbl The table to clone
+-- @return table The cloned table
+function utils.tableClone(tbl)
+  expect(1, tbl, "table")
+  local new = {}
+  for k, v in pairs(tbl) do
+    new[k] = v
+  end
+  
+  return new
 end
 
 return utils

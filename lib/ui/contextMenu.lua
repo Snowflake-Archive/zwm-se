@@ -75,8 +75,7 @@ function contextMenu:render(x, y, objectsOnly, selected)
     self.renderedX = x
     self.renderedY = y
     self.renderedMaxLength = maxLength
-    drawUtils.drawBorder(x - 1, y - 1, maxLength + 2, #self.objects + 2, colors.lightGray, "2-box" .. (self.dropdownStyle and "-dropdown" or ""))
-    paintutils.drawFilledBox(x, y, x + maxLength - 1, y + #self.objects - 1, colors.lightGray)
+    paintutils.drawFilledBox(x - 1, y, x + maxLength + 1, y + #self.objects - 1, colors.lightGray)
     self.visible = true
 
     self:render(nil, nil, true, selected)
@@ -103,6 +102,7 @@ end
 function contextMenu:hide()
   self.visibleObjects = {}
   self.visible = false
+  self.selected = nil
 end
 
 return contextMenu

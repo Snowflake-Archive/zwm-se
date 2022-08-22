@@ -47,7 +47,7 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars, visible)
     maxHeight = 0,
     doRenderScrollbars = renderScrollbars,
     parent = parent,
-    items = {},
+    lines = {},
     visible = visible ~= false,
   }
 
@@ -82,9 +82,9 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars, visible)
       local oldX, oldY = scrollWin.getCursorPos()
       local sX, sY = o.scrollX, o.scrollY
       scrollWin.clear()
-      for _, v in pairs(o.items) do
-        scrollWin.setCursorPos(v.x + sX - 1, v.y + sY - 1)
-        scrollWin.blit(v.text, v.foreground, v.background)
+      for i, v in pairs(o.lines) do
+        scrollWin.setCursorPos(1, i + sY - 1)
+        scrollWin.blit(v[1], v[2], v[3])
       end
       scrollWin.setCursorPos(oldX, oldY)
       renderScrollbars()
@@ -96,10 +96,38 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars, visible)
     expect(2, foreground, "string")
     expect(3, background, "string")
 
+    local fg = colors.toBlit(term.getTextColor())
+    local bg = colors.toBlit(term.getBackgroundColor())
+    local sp = " "
+
     local cx, cy = scrollWin.getCursorPos()
     o.maxWidth = math.max(o.maxWidth, cx + #text)
     o.maxHeight = math.max(o.maxHeight, cy)
-    o.items[#o.items + 1] = {text = text, x = cx, y = cy, foreground = foreground, background = background}
+
+    if o.lines[cy] then
+      local len = #o.lines[cy][1]
+
+      if cx > len + 1 then
+        o.lines[cy][1] = o.lines[cy][1] .. sp:rep(cx - len - 1) .. text
+        o.lines[cy][2] = o.lines[cy][2] .. fg:rep(cx - len - 1) .. foreground
+        o.lines[cy][3] = o.lines[cy][3] .. bg:rep(cx - len - 1) .. background
+      elseif cx == len + 1 then
+        o.lines[cy][1] = o.lines[cy][1] .. text
+        o.lines[cy][2] = o.lines[cy][2] .. foreground
+        o.lines[cy][3] = o.lines[cy][3] .. background
+      elseif cx < len + 1 then
+        o.lines[cy][1] = o.lines[cy][1]:sub(1, cx - 1) .. text .. o.lines[cy][1]:sub(cx + #text)
+        o.lines[cy][2] = o.lines[cy][2]:sub(1, cx - 1) .. foreground .. o.lines[cy][2]:sub(cx + #text)
+        o.lines[cy][3] = o.lines[cy][3]:sub(1, cx - 1) .. background .. o.lines[cy][3]:sub(cx + #text)
+      end
+    else
+      local preCount = cx - 1
+      o.lines[cy] = {
+        sp:rep(preCount) .. text,
+        fg:rep(preCount) .. foreground,
+        bg:rep(preCount) .. background,
+      }
+    end
     scrollWin.setCursorPos(cx + #text, cy)
     redraw()
   end
@@ -132,7 +160,7 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars, visible)
       o.scrollWin.clear()
       o.maxWidth = 0
       o.maxHeight = 0
-      o.items = {}
+      o.lines = {}
     end,
     clearLine = scrollWin.clearLine,
     getTextColour = scrollWin.getTextColor,

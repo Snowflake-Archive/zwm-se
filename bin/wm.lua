@@ -1,5 +1,6 @@
 -- Module imports
 local logger = require(".lib.log")
+local utils = require(".lib.utils")
 local RegistryReader = require(".lib.Registry.Reader")
 
 local expect = require("cc.expect").expect
@@ -15,7 +16,9 @@ local displayOrder = {}
 
 --- The window manager and it's functions.
 -- @module[kind=core] WindowManager
-local wm = {}
+local wm = {
+  started = os.epoch("utc"),
+}
 
 local windowRenderer = require(".bin.WindowManagerModules.WindowRenderer"):new(logger, buffer, displayOrder, processes)
 local windowEvents = require(".bin.WindowManagerModules.WindowEvents"):new(logger, buffer, wm)
@@ -89,7 +92,7 @@ xpcall(function()
   --- Gets all running processes.
   -- @return Process[] The processes.
   function wm.getProcesses()
-    return processes
+    return utils.tableClone(processes)
   end
 
   --- Gets the size of the window manager.
@@ -121,6 +124,9 @@ xpcall(function()
       end
     end
 
+    newProcess.title = options.title or (type(process) == "string" and fs.getName(process):gsub(".lua", "") or "Untitled")
+    newProcess.started = os.epoch("utc")
+
     if options.isService ~= true then
       nextRedraw = true
 
@@ -133,7 +139,6 @@ xpcall(function()
       newProcess.h = options.h or 10
       newProcess.x = options.x or 2
       newProcess.y = options.y or 2
-      newProcess.title = options.title or (type(process) == "string" and fs.getName(process) or "Untitled")
       newProcess.isResizeable = options.isResizeable == true or options.isResizeable == nil
       newProcess.hideFrame = options.hideFrame or false
       newProcess.minimized = options.minimized or false
