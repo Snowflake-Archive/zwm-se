@@ -6,7 +6,7 @@ local expect = require("cc.expect").expect
 local uiManager = {}
 
 -- Button Events
-local function fireButtonEvents(id, o, e)
+local function fireButtonEvents(_, o, e)
   if e[1] == "mouse_click" then
     local m, x, y = e[2], e[3], e[4]
 
@@ -42,7 +42,7 @@ local function fireButtonEvents(id, o, e)
 end
 
 -- Input Events
-local function fireInputEvents(id, o, e)
+local function fireInputEvents(_, o, e)
   if e[1] == "mouse_click" then
     local m, x, y = e[2], e[3], e[4]
 

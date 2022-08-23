@@ -5,7 +5,6 @@ local contextMenu = {}
 local expect = require("cc.expect").expect
 local strings = require("cc.strings")
 local utils = require(".lib.utils")
-local drawUtils = require(".lib.utils.draw")
 
 --- Creates a new context menu.
 -- @tparam table objects The objects to add to the context menu.

@@ -80,7 +80,7 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars, visible)
   local function redraw()
     if o.visible then
       local oldX, oldY = scrollWin.getCursorPos()
-      local sX, sY = o.scrollX, o.scrollY
+      local _, sY = o.scrollX, o.scrollY
       scrollWin.clear()
       for i, v in pairs(o.lines) do
         scrollWin.setCursorPos(1, i + sY - 1)

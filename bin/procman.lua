@@ -45,7 +45,7 @@ local menubar = require(".lib.ui.menubar"):new({
         end,
       },
     },
-  }
+  },
 })
 
 menubar:inject(eventManager, uiManager)

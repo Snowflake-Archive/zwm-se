@@ -38,7 +38,7 @@ function menubar:render()
 
   local cX, cY = 1, 1
 
-  for i, v in pairs(self.menus) do
+  for _, v in pairs(self.menus) do
     term.setCursorPos(cX, cY)
     term.setBackgroundColor(v.menu.visible and colors.gray or colors.lightGray)
     term.setTextColor(colors.black)
@@ -64,7 +64,7 @@ function menubar:inject(eventManager, uiManager)
     local mX = 1
 
     local found = false
-    for i, v in pairs(self.menus) do
+    for _, v in pairs(self.menus) do
       if v.menu.visible == true then
         found = true
       else
