@@ -13,9 +13,14 @@ local w, h = term.getSize()
 
 local str = _ENV.infoText or "No info text provided"
 
-local ok = buttons:new(w - 5, h - 1, "OK", function()
-  _ENV.wm.killProcess(_ENV.wm.id)
-end)
+local ok = buttons:new{
+  x = w - 5, 
+  y = h - 1, 
+  text = "OK", 
+  callback = function()
+    _ENV.wm.killProcess(_ENV.wm.id)
+  end,
+}
 
 eventManager:inject(manager)
 eventManager:addButton(ok)

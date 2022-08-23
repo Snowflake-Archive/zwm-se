@@ -5,6 +5,7 @@ local eventManager = require(".lib.events")
 local scrollbox = require(".lib.ui.scrollbox")
 local focusableEventManager = require(".lib.ui.focusableEventManager")
 local RegistryReader = require(".lib.registry.Reader")
+local RegistryWriter = require(".lib.registry.Writer")
 local strings = require("cc.strings")
 
 local menu = {}
@@ -100,6 +101,7 @@ function menu:init()
   self.focusableEventManager = focusableEventManager:new()
 
   self.registry = RegistryReader:new("user")
+  self.regWrite = RegistryWriter:new("user")
 
   self.scroll = scrollbox:new(1, 1, 15, 10, self.buffer, {y = true}, false)
 
@@ -194,7 +196,19 @@ function menu:renderScrollbox()
         t.write(strings.ensure_width(fs.getName(v.path), 14))
         t.setCursorPos(1, i * 3 + 1)
         t.setTextColor(colors.lightGray)
-        t.write(strings.ensure_width(v.dir, 14))
+        t.write(strings.ensure_width(v.dir, 12))
+
+        local isFavorited = false
+
+        for _, v2 in pairs(self.registry:get("Menu.PinnedApps")) do
+          if fs.combine(v2.path) == v.path then
+            isFavorited = true
+            break
+          end
+        end
+
+        t.setTextColor(isFavorited == true and colors.red or colors.lightGray)
+        t.write(" \3")
         searchLaunch[#searchLaunch + 1] = {
           y = i * 3,
           path = v.path,
@@ -217,6 +231,8 @@ function menu:renderScrollbox()
       t.write(v.name)
     end
   end
+
+  t.setTextColor(colors.lightGray)
 end
 
 function menu:setMenuVisible(value)
@@ -323,10 +339,35 @@ function menu:fire(e)
 
         if searchContent ~= "" then
           for _, v in pairs(searchLaunch) do
-            if x >= 2 and x <= 14 and y >= self.h - 16 + sY + v.y and y <= self.h - 15 + sY + v.y then
-              self.wm.addProcess(v.path, {title = v.name}, true)
-              self.isMenuVisible = false
-              break
+            if x >= 2 and x <= 14 and y >= self.h - 15 + sY + v.y and y <= self.h - 14 + sY + v.y then
+              if y == self.h - 14 + sY + v.y and x == 14 then
+                local isFavorited
+                local pinned = self.registry:get("Menu.PinnedApps")
+                
+                for i, v2 in pairs(pinned) do
+                  if fs.combine(v2.path) == fs.combine(v.path) then
+                    isFavorited = i
+                    break
+                  end
+                end
+
+                if isFavorited then
+                  pinned[isFavorited] = nil
+                  self.regWrite:set("Menu.PinnedApps", pinned)
+                else
+                  table.insert(pinned, {
+                    path = v.path,
+                    name = fs.getName(v.path)
+                  })
+                end
+        
+                self:renderScrollbox()
+                break
+              else
+                self.wm.addProcess(v.path, {title = v.name}, true)
+                self.isMenuVisible = false
+                break
+              end
             end
           end
         else
