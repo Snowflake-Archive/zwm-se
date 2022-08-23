@@ -1,4 +1,5 @@
 local eventManager = require(".lib.events"):new()
+local buttons = require(".lib.ui.button")
 local uiManager = require(".lib.ui.uiManager"):new()
 local mainScrollbox = require(".lib.ui.scrollbox"):new(1, 3, 1, 1, term.current(), {y = true})
 local utils = require(".lib.utils")
@@ -7,6 +8,17 @@ local w, h = 0, 0
 local processes = {}
 
 local selectedTask = nil
+
+local endTask = buttons:new(1, 1, "Kill Task", function()
+  _ENV.wm.killProcess(selectedTask)
+end, true, nil, nil, {
+  background = colors.gray,
+  clicking = colors.black,
+  text = colors.white,
+  textDisabled = colors.black,
+})
+
+uiManager:addButton(endTask)
 
 local menubar = require(".lib.ui.menubar"):new({
   {
@@ -73,6 +85,7 @@ local function renderData()
 
   local runtimePosition = math.max(w / 2, maxw + 3)
 
+  term.setBackgroundColor(colors.white)
   term.setCursorPos(2, 2)
   term.setTextColor(colors.black)
   term.write("Name")
@@ -95,6 +108,10 @@ local function renderData()
   term.write(" ")
 
   term.redirect(c)
+
+  paintutils.drawFilledBox(1, h - 2, w, h, colors.lightGray)
+  endTask:reposition(w - 11, h - 1)
+  endTask:render()
 
   menubar:render()
 end
@@ -124,6 +141,8 @@ eventManager:addListener("mouse_click", function(m, _, y)
         end
         pY = pY + 1
       end
+
+      endTask:setDisabled(selectedTask == nil)
     end
   end
 end)
