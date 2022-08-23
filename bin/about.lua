@@ -15,9 +15,14 @@ local lua = _VERSION
 
 local machineReader = RegistryReader:new("machine")
 
-local ok = button:new(1, 1, "OK", function()
-  _ENV.wm.killProcess(_ENV.wm.id)
-end)
+local ok = button:new{
+  x = 1, 
+  y = 1, 
+  text = "OK", 
+  callback = function()
+    _ENV.wm.killProcess(_ENV.wm.id)
+  end,
+}
 
 local learnMore = {
   minX = 0,

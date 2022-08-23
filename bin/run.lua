@@ -11,14 +11,25 @@ local manager = events:new()
 local focusableManager = focusableEventManager:new()
 local path = ""
 
-local okay = button:new(w - 4, h - 1, "OK", function()
-  _ENV.wm.addProcess(path, { isCentered = true }, true)
-  _ENV.wm.killProcess(_ENV.wm.id)
-end, true)
+local okay = button:new{
+  x = w - 4, 
+  y = h - 1, 
+  text = "OK", 
+  callback = function()
+    _ENV.wm.addProcess(path, { isCentered = true }, true)
+    _ENV.wm.killProcess(_ENV.wm.id)
+  end, 
+  disabled = true,
+}
 
-local cancel = button:new(w - 14, h - 1, "Cancel", function()
-  _ENV.wm.killProcess(_ENV.wm.id)
-end)
+local cancel = button:new{
+  x = w - 14, 
+  y = h - 1, 
+  text = "Cancel", 
+  callback = function()
+    _ENV.wm.killProcess(_ENV.wm.id)
+  end,
+}
 
 local path = input:new(2, 4, w - 4, function(content) 
   if #content == 0 then

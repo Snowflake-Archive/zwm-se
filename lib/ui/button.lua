@@ -3,7 +3,8 @@
 
 local drawing = require(".lib.utils.draw")
 local reigstryReader = require(".lib.registry.Reader")
-local expect = require("cc.expect").expect
+local ccexpect = require("cc.expect")
+local expect, field = ccexpect.expect, ccexpect.field
 
 local button = {}
 
@@ -17,29 +18,22 @@ local button = {}
 -- @tparam[opt] boolean disablePadding If this is true, the text of the button will be its actual text, and not padded.
 -- @tparam[opt] table colors A table for colors, background, clicking, focused, text, and textDisabled 
 -- @return Button The new button.
-function button:new(x, y, text, callback, disabled, visible, disablePadding, colors)
-  expect(1, x, "number")
-  expect(2, y, "number")
-  expect(3, text, "string")
-  expect(4, callback, "function")
-  expect(5, disabled, "boolean", "nil")
-  expect(6, visible, "boolean", "nil")
-  expect(7, disablePadding, "boolean", "nil")
-  expect(8, colors, "table", "nil")
+function button:new(options)
+  expect(1, options, "table")
 
   local o = {
-    x = x,
-    y = y,
-    text = text,
-    callback = callback,
-    disabled = disabled == true,
+    x = field(options, "x", "number"),
+    y = field(options, "y", "number"),
+    text = field(options, "text", "string"),
+    callback = field(options, "callback", "function"),
+    disabled = field(options, "disabled", "boolean", "nil") == true,
     isFocused = false,
     isBeingClicked = false,
-    visible = visible ~= false,
-    disablePadding = disablePadding == true,
-    colors = colors or {},
+    visible = field(options, "visible", "boolean", "nil") ~= false,
+    disablePadding = field(options, "disablePadding", "boolean", "nil") == true,
+    colors = field(options, "colors", "table", "nil") or {},
     reader = reigstryReader:new("user"),
-
+    type = "button",
   }
 
   setmetatable(o, self)

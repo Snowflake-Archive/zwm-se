@@ -9,14 +9,21 @@ local processes = {}
 
 local selectedTask = nil
 
-local endTask = buttons:new(1, 1, "Kill Task", function()
-  _ENV.wm.killProcess(selectedTask)
-end, true, nil, nil, {
-  background = colors.gray,
-  clicking = colors.black,
-  text = colors.white,
-  textDisabled = colors.black,
-})
+local endTask = buttons:new{
+  x = 1, 
+  y = 1, 
+  text = "Kill Task", 
+  callback = function()
+    _ENV.wm.killProcess(selectedTask)
+  end, 
+  disabled = true, 
+  colors = {
+    background = colors.gray,
+    clicking = colors.black,
+    text = colors.white,
+    textDisabled = colors.black,
+  },
+}
 
 uiManager:addButton(endTask)
 

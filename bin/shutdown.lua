@@ -6,23 +6,38 @@ local focusableEventManager = require('.lib.ui.focusableEventManager'):new()
 
 local focused = true
 
-local shutdown = buttonManager:new(3, 4, "Shutdown", function() 
-  os.shutdown()
-end, nil, nil, nil, {
-  background = reader:get("Appearance.ShutdownMenu.ShutdownButton"),
-  text = reader:get("Appearance.ShutdownMenu.ShutdownButtonText"),
-  clicking = reader:get("Appearance.ShutdownMenu.ShutdownButtonText"),
-})
-local reboot = buttonManager:new(15, 4, "Reboot", function() 
-  os.reboot()
-end, nil, nil, nil, {
-  background = reader:get("Appearance.ShutdownMenu.RebootButton"),
-  text = reader:get("Appearance.ShutdownMenu.RebootButtonText"),
-  clicking = reader:get("Appearance.ShutdownMenu.RebootButtonText"),
-})
-local cancel = buttonManager:new(9, 7, "Cancel", function() 
-  _ENV.wm.killProcess(_ENV.wm.id)
-end)
+local shutdown = buttonManager:new{
+  x = 3, 
+  y = 4, 
+  text = "Shutdown", 
+  callback = os.shutdown,
+  colors = {
+    background = reader:get("Appearance.ShutdownMenu.ShutdownButton"),
+    text = reader:get("Appearance.ShutdownMenu.ShutdownButtonText"),
+    clicking = reader:get("Appearance.ShutdownMenu.ShutdownButtonText"),
+  },
+}
+
+local reboot = buttonManager:new{
+  x = 15, 
+  y = 4, 
+  text = "Reboot", 
+  callback = os.reboot,
+  colors = {
+    background = reader:get("Appearance.ShutdownMenu.RebootButton"),
+    text = reader:get("Appearance.ShutdownMenu.RebootButtonText"),
+    clicking = reader:get("Appearance.ShutdownMenu.RebootButtonText"),
+  },
+}
+
+local cancel = buttonManager:new{
+  x = 9, 
+  y = 7, 
+  text = "Cancel", 
+  callback = function()
+    _ENV.wm.killProcess(_ENV.wm.id)
+  end,
+}
 
 focusableEventManager:addButton(shutdown)
 focusableEventManager:addButton(reboot)

@@ -10,9 +10,14 @@ if _ENV.wmProcessStopInfo then
 
   local current = term.current()
   local errorInfoBox = scrollbox:new(2, 2, w - 2, h - 4, current, {y = true})
-  local okay = button:new(w - 5, h - 1, "OK", function()
-    _ENV.wm.killProcess(_ENV.wm.id)
-  end)
+  local okay = button:new{
+    x = w - 5, 
+    y = h - 1, 
+    text = "OK", 
+    callback = function()
+      _ENV.wm.killProcess(_ENV.wm.id)
+    end,
+  }
 
   local scrollboxTerm = errorInfoBox:getTerminal()
 

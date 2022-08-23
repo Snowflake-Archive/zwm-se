@@ -108,20 +108,28 @@ function menu:init()
     self:renderScrollbox()
   end, function() end, "Search...", nil, nil, false)
 
-  self.shutdownButton = button:new(1, 1, "O", function()
-    self.wm.addProcess("/bin/shutdown.lua", {
-      hideFrame = true, 
-      w = 24, 
-      h = 9, 
-      isCentered = true,
-      title = "Power",
-    }, true)
-    self:setMenuVisible(false)
-  end, nil, false, true, {
-    background = self.registry:get("Appearance.Menu.ShutdownBackground"),
-    clicking = self.registry:get("Appearance.Menu.ShutdownFocused"),
-    text = self.registry:get("Appearance.Menu.ShutdownText"),
-  })
+  self.shutdownButton = button:new{
+    x = 1, 
+    y = 1, 
+    text = "O", 
+    callback = function()
+      self.wm.addProcess("/bin/shutdown.lua", {
+        hideFrame = true, 
+        w = 24, 
+        h = 9, 
+        isCentered = true,
+        title = "Power",
+      }, true)
+      self:setMenuVisible(false)
+    end,
+    visible = false, 
+    disablePadding = true,
+    colors = {
+      background = self.registry:get("Appearance.Menu.ShutdownBackground"),
+      clicking = self.registry:get("Appearance.Menu.ShutdownFocused"),
+      text = self.registry:get("Appearance.Menu.ShutdownText"),
+    },
+  }
 
   self.scroll:addToEventManager(self.eventManager)
   self.focusableEventManager:addInput(self.searchInput)
@@ -160,24 +168,38 @@ function menu:renderScrollbox()
       end
     end
 
-    search("/", 0)
+    local function beginSearch()
+      search("/", 0)
+    end
 
-    t.setCursorPos(1, 1)
-    t.write(("%d results"):format(#programs))
+    local ok = pcall(beginSearch)
 
-    searchLaunch = {}
+    if not ok then
+      local str = "An error occured while searching. If you are using Lua patterns, make sure the pattern is complete."
+      local split = strings.wrap(str, 14)
 
-    for i, v in pairs(programs) do
-      t.setCursorPos(1, i * 3)
-      t.setTextColor(colors.white)
-      t.write(strings.ensure_width(fs.getName(v.path), 14))
-      t.setCursorPos(1, i * 3 + 1)
-      t.setTextColor(colors.lightGray)
-      t.write(strings.ensure_width(v.dir, 14))
-      searchLaunch[#searchLaunch + 1] = {
-        y = i * 3,
-        path = v.path,
-      }
+      for i, v in pairs(split) do
+        t.setCursorPos(1, i)
+        t.write(v)
+      end
+    else
+      t.setCursorPos(1, 1)
+      t.write(("%d results"):format(#programs))
+
+      searchLaunch = {}
+
+      for i, v in pairs(programs) do
+        t.setCursorPos(1, i * 3)
+        t.setTextColor(colors.white)
+        t.write(strings.ensure_width(fs.getName(v.path), 14))
+        t.setCursorPos(1, i * 3 + 1)
+        t.setTextColor(colors.lightGray)
+        t.write(strings.ensure_width(v.dir, 14))
+        searchLaunch[#searchLaunch + 1] = {
+          y = i * 3,
+          path = v.path,
+        }
+      end
     end
   else
     t.setBackgroundColor(colors.gray)
