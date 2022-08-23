@@ -8,10 +8,17 @@ local uiManager = {}
 -- Button Events
 local function fireButtonEvents(_, o, e)
   if e[1] == "mouse_click" then
-    local m, x, y = e[2], e[3], e[4]
+    local m, oX, oY = e[2], e[3], e[4]
 
     if m == 1 then
       for _, v in pairs(o) do
+        local x, y = oX, oY
+        if v.scrollbox then
+          local sX, sY = v.scrollbox:getScroll()
+          x = x - sX
+          y = y - sY
+        end
+
         if v.disabled == false and v.visible == true then
           if v.visible and v.renderedWidth and y == v.y and x >= v.x and x <= v.x + v.renderedWidth - 1 then        
             v:click(true)
@@ -23,10 +30,17 @@ local function fireButtonEvents(_, o, e)
       end
     end
   elseif e[1] == "mouse_up" then
-    local m, x, y = e[2], e[3], e[4]
+    local m, oX, oY = e[2], e[3], e[4]
 
     if m == 1 then
       for _, v in pairs(o) do
+        local x, y = oX, oY
+        if v.scrollbox then
+          local sX, sY = v.scrollbox:getScroll()
+          x = x - sX
+          y = y - sY
+        end
+
         if v.visible and v.y == y and x >= v.x and x <= v.x + #v.text + 1 and v.isBeingClicked == true then
           v:setFocused(true)
           v:click()
@@ -44,10 +58,17 @@ end
 -- Input Events
 local function fireInputEvents(_, o, e)
   if e[1] == "mouse_click" then
-    local m, x, y = e[2], e[3], e[4]
+    local m, oX, oY = e[2], e[3], e[4]
 
     if m == 1 then
       for _, v in pairs(o) do
+        local x, y = oX, oY
+        if v.scrollbox then
+          local sX, sY = v.scrollbox:getScroll()
+          x = x - sX
+          y = y - sY
+        end
+        
         if v.disabled == false and v.visible == true then
           if x >= v.x and x <= v.x + v.w - 1 and v.y == y then
             v:setFocused(true)
@@ -72,10 +93,17 @@ end
 -- Context Menu Events
 local function fireContextMenuEvents(id, o, e, hasContextMenuVisible)
   if e[1] == "mouse_click" or e[1] == "mouse_drag" or e[1] == "mouse_up" then
-    local m, x, y = e[2], e[3], e[4]
+    local m, oX, oY = e[2], e[3], e[4]
 
     if hasContextMenuVisible == nil and e[1] == "mouse_click" then
       for i, v in pairs(o) do
+        local x, y = oX, oY
+        if v.scrollbox then
+          local sX, sY = v.scrollbox:getScroll()
+          x = x - sX
+          y = y - sY
+        end
+
         if v.triggerMethod and v.triggerMethod.type == "rightClick" and m == 2 then
           v:render(x + 1, y + 1)
           return i
@@ -83,6 +111,7 @@ local function fireContextMenuEvents(id, o, e, hasContextMenuVisible)
       end
     elseif hasContextMenuVisible ~= nil then
       local menu = o[hasContextMenuVisible]
+      local x, y = oX, oY
 
       if x >= menu.renderedX - 1 and y >= menu.renderedY - 1 and x <= menu.renderedX + menu.renderedMaxLength + 1 and y <= menu.renderedY + #menu.visibleObjects + 1 then
         if e[1] == "mouse_click" or e[1] == "mouse_drag" then
@@ -148,25 +177,31 @@ end
 
 --- Adds a button to the event manager.
 -- @tparam Button button The button to add.
-function uiManager:addButton(object)
+-- @tparam table scrollbox If the object is contained in a scrollbox, provide the scrollbox here, so the events can react. 
+function uiManager:addButton(object, scrollbox)
   expect(1, object, "table")
 
+  object.scrollbox = scrollbox
   table.insert(self.buttons, object)
 end
 
 --- Adds an input to the event manager.
 -- @tparam Input input The input to add.
-function uiManager:addInput(object)
+-- @tparam table scrollbox If the object is contained in a scrollbox, provide the scrollbox here, so the events can react. 
+function uiManager:addInput(object, scrollbox)
   expect(1, object, "table")
 
+  object.scrollbox = scrollbox
   table.insert(self.inputs, object)
 end
 
 --- Adds a context menu to the event manager.
 -- @tparam ContextMenu contextMenu The context menu to add.
-function uiManager:addContextMenu(object)
+-- @tparam table scrollbox If the object is contained in a scrollbox, provide the scrollbox here, so the events can react. 
+function uiManager:addContextMenu(object, scrollbox)
   expect(1, object, "table")
 
+  object.scrollbox = scrollbox
   table.insert(self.contextMenus, object)
 end
 
