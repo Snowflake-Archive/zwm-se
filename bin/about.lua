@@ -12,7 +12,7 @@ local scrollbox = require(".lib.ui.scrollbox"):new{
   renderScrollbars = {y = true},
 }
 
-local focusManager = require(".lib.ui.focusableEventManager"):new()
+local focusManager = require(".lib.ui.uiManager"):new()
 local eventManager = require(".lib.events"):new()
 local RegistryReader = require(".lib.registry.Reader")
 local strings = require("cc.strings")

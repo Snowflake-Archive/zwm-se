@@ -4,10 +4,10 @@ local nft = require("cc.image.nft")
 local strings = require("cc.strings")
 local buttons = require(".lib.ui.button")
 local events = require(".lib.events")
-local focusableEventManager = require(".lib.ui.focusableEventManager")
+local uiManager = require(".lib.ui.uiManager")
 
 local manager = events:new()
-local eventManager = focusableEventManager:new()
+local eventManager = uiManager:new()
 local x = nft.load("/bin/Assets/info.nft")
 local w, h = term.getSize()
 

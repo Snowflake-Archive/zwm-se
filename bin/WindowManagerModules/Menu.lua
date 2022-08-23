@@ -3,7 +3,7 @@ local input = require(".lib.ui.input")
 local button = require(".lib.ui.button")
 local eventManager = require(".lib.events")
 local scrollbox = require(".lib.ui.scrollbox")
-local focusableEventManager = require(".lib.ui.focusableEventManager")
+local uiManager = require(".lib.ui.uiManager")
 local RegistryReader = require(".lib.registry.Reader")
 local RegistryWriter = require(".lib.registry.Writer")
 local strings = require("cc.strings")
@@ -98,7 +98,7 @@ end
 
 function menu:init()
   self.eventManager = eventManager:new()
-  self.focusableEventManager = focusableEventManager:new()
+  self.uiManager = uiManager:new()
 
   self.registry = RegistryReader:new("user")
   self.regWrite = RegistryWriter:new("user")
@@ -149,9 +149,9 @@ function menu:init()
   }
 
   self.scroll:addToEventManager(self.eventManager)
-  self.focusableEventManager:addInput(self.searchInput)
-  self.focusableEventManager:addButton(self.shutdownButton)
-  self.focusableEventManager:inject(self.eventManager)
+  self.uiManager:addInput(self.searchInput)
+  self.uiManager:addButton(self.shutdownButton)
+  self.uiManager:inject(self.eventManager)
 end
 
 function menu:renderScrollbox()

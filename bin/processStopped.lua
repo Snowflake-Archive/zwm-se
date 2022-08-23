@@ -1,10 +1,10 @@
 if _ENV.wmProcessStopInfo then
   local scrollbox = require(".lib.ui.scrollbox")
   local button = require(".lib.ui.button")
-  local focusableEventManager = require(".lib.ui.focusableEventManager")
+  local uiManager = require(".lib.ui.uiManager")
   local strings = require("cc.strings")
 
-  local focusableManager = focusableEventManager:new()
+  local focusableManager = uiManager:new()
   local eventManager = require(".lib.events"):new()
   local w, h = term.getSize()
 

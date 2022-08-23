@@ -1,6 +1,6 @@
 local button = require(".lib.ui.button")
 local input = require(".lib.ui.input")
-local focusableEventManager = require(".lib.ui.focusableEventManager")
+local uiManager = require(".lib.ui.uiManager")
 local events = require(".lib.events")
 
 _ENV.wm.setProcessTitle(_ENV.wm.id, "Run")
@@ -8,7 +8,7 @@ _ENV.wm.setProcessTitle(_ENV.wm.id, "Run")
 local w, h = term.getSize()
 
 local manager = events:new()
-local focusableManager = focusableEventManager:new()
+local focusableManager = uiManager:new()
 local path = ""
 
 local okay = button:new{

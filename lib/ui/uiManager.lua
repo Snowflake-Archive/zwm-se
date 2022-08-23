@@ -180,6 +180,20 @@ function uiManager:check(e)
     e[4] = e[4] + self.yOffset
   end
 
+  local function removeRemoved(index)
+    local t = self[index]
+
+    for i, v in pairs(t) do
+      if v.removed then
+        self[index][i] = nil
+      end
+    end
+  end
+
+  removeRemoved("buttons")
+  removeRemoved("inputs")
+  removeRemoved("contextMenus")
+
   fireButtonEvents(self.id, self.buttons, e)
   fireInputEvents(self.id, self.inputs, e)
   self.hasContextMenuVisible = fireContextMenuEvents(self.id, self.contextMenus, e, self.hasContextMenuVisible)

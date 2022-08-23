@@ -2,7 +2,7 @@ local drawUtils = require('.lib.utils.draw')
 local buttonManager = require(".lib.ui.button")
 local reader = require(".lib.registry.Reader"):new("user")
 local events = require('.lib.events'):new()
-local focusableEventManager = require('.lib.ui.focusableEventManager'):new()
+local uiManager = require('.lib.ui.uiManager'):new()
 
 local focused = true
 
@@ -39,10 +39,10 @@ local cancel = buttonManager:new{
   end,
 }
 
-focusableEventManager:addButton(shutdown)
-focusableEventManager:addButton(reboot)
-focusableEventManager:addButton(cancel)
-focusableEventManager:inject(events)
+uiManager:addButton(shutdown)
+uiManager:addButton(reboot)
+uiManager:addButton(cancel)
+uiManager:inject(events)
 
 local function render()
   local w, h = term.getSize()

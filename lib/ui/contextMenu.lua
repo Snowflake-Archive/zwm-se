@@ -20,6 +20,7 @@ function contextMenu:new(objects)
     triggerMethod = field(objects, "triggerMethod", "table", "nil"),
     visibleObjects = {},
     dropdownStyle = field(objects, "dropdownStyle", "boolean", "nil") == true, 
+    type = "contextMenu",
   }
   setmetatable(o, self)
   self.__index = self
