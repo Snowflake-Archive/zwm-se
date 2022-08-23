@@ -27,7 +27,6 @@ end
 -- @return The updated table.
 function RegistryWriter:set(key, value)
   expect(1, key, "string")
-  expect(2, value, "any")
 
   local children = self.data
 

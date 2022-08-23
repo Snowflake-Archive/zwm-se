@@ -223,12 +223,15 @@ function menu:renderScrollbox()
     t.write("Pinned Apps")
     t.setCursorPos(1, 10)
 
-    for i, v in pairs(self.registry:get("Menu.PinnedApps")) do
-      t.setCursorPos(1, 1 + i)
+    local y = 1
+    for _, v in pairs(self.registry:get("Menu.PinnedApps")) do
+      t.setCursorPos(1, 1 + y)
       t.setTextColor(colors.white)
       t.write("\7 ")
       t.setTextColor(colors.lightBlue)
       t.write(v.name)
+
+      y = y + 1
     end
   end
 
@@ -321,8 +324,6 @@ function menu:render(processes)
     self.searchInput:setVisible(false)
   end
 
-  
-
   term.setTextColor(oldColor)
   term.setCursorPos(oldX, oldY)
 end
@@ -334,13 +335,14 @@ function menu:fire(e)
   if e[1] == "mouse_click" then
     local m, x, y = e[2], e[3], e[4]
     if self.w and self.h and self.isMenuVisible and x >= 1 and x <= 16 and y >= self.h - 14 and y <= self.h - 1 then
-      if x >= 2 and x <= 14 and y >= self.h - 13 and y <= self.h - 5 then
+      if x >= 2 and x <= 16 and y >= self.h - 13 and y <= self.h - 5 then
         local _, sY = self.scroll:getScroll()
 
         if searchContent ~= "" then
           for _, v in pairs(searchLaunch) do
-            if x >= 2 and x <= 14 and y >= self.h - 15 + sY + v.y and y <= self.h - 14 + sY + v.y then
-              if y == self.h - 14 + sY + v.y and x == 14 then
+            if x >= 2 and x <= 16 and y >= self.h - 15 + sY + v.y and y <= self.h - 14 + sY + v.y then
+              self.logger:info("Click pin2 %d %d %d %d ", x, 15, y, self.h - 14 + sY + v.y )
+              if y == self.h - 14 + sY + v.y and x == 15 then
                 local isFavorited
                 local pinned = self.registry:get("Menu.PinnedApps")
                 
@@ -353,13 +355,17 @@ function menu:fire(e)
 
                 if isFavorited then
                   pinned[isFavorited] = nil
-                  self.regWrite:set("Menu.PinnedApps", pinned)
                 else
                   table.insert(pinned, {
                     path = v.path,
-                    name = fs.getName(v.path)
+                    name = fs.getName(v.path):gsub(".lua", ""),
                   })
                 end
+
+                self.logger:info("Click pin " .. tostring(isFavorited))
+                self.logger:info(textutils.serialiseJSON(pinned))
+                
+                self.registry:reload(self.regWrite:set("Menu.PinnedApps", textutils.serialiseJSON(pinned)))
         
                 self:renderScrollbox()
                 break
