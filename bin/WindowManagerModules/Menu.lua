@@ -103,12 +103,27 @@ function menu:init()
   self.registry = RegistryReader:new("user")
   self.regWrite = RegistryWriter:new("user")
 
-  self.scroll = scrollbox:new(1, 1, 15, 10, self.buffer, {y = true}, false)
+  self.scroll = scrollbox:new{
+    x = 1, 
+    y = 1, 
+    w = 15, 
+    h = 10, 
+    parent = self.buffer, 
+    renderScrollbars = {y = true}, 
+    visible = false,
+  }
 
-  self.searchInput = input:new(1, 1, 9, function(data)
-    searchContent = data
-    self:renderScrollbox()
-  end, function() end, "Search...", nil, nil, false)
+  self.searchInput = input:new{
+    x = 1, 
+    y = 1, 
+    w = 9, 
+    onChange = function(data)
+      searchContent = data
+      self:renderScrollbox()
+    end, 
+    placeholder = "Search...", 
+    visible = false,
+  }
 
   self.shutdownButton = button:new{
     x = 1, 

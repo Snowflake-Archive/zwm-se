@@ -8,7 +8,8 @@ local expect, field = ccexpect.expect, ccexpect.field
 
 local button = {}
 
---- Creates a new button. The buttons width will be #text + 4.
+--- Creates a new button. via a dictionary. The buttons width will be #text + 4.
+-- The below parameters are in no particular order.
 -- @tparam number x The X position of the button
 -- @tparam number y The Y position of the button
 -- @tparam string text The text that will be rendered inside the button.
@@ -154,6 +155,12 @@ function button:click(isFirst)
     self:setFocused(true)
     self:render(true)
   end
+end
+
+--- Removes a button
+function button:remove()
+  self.removed = true
+  self.visible = false
 end
 
 return button

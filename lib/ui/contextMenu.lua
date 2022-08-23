@@ -2,27 +2,24 @@
 -- @module[kind=ui] ContextMenu
 
 local contextMenu = {}
-local expect = require("cc.expect").expect
 local strings = require("cc.strings")
 local utils = require(".lib.utils")
+local ccexpect = require("cc.expect")
+local expect, field = ccexpect.expect, ccexpect.field
 
---- Creates a new context menu.
+--- Creates a new context menu via a dictionary.
+-- The below parameters are in no particular order.
 -- @tparam table objects The objects to add to the context menu.
 -- @tparam[opt] table triggerMethod A table used to describe how the context menu will be triggered.
 -- @tparam[opt] table colors The colors to use in the context menu.
 -- @tparam[opt] boolean dropdownStyle If true, the top of the context menu will be chopped off.
-function contextMenu:new(objects, triggerMethod, colors, dropdownStyle)
-  expect(1, objects, "table")
-  expect(2, triggerMethod, "table", "nil")
-  expect(3, colors, "table", "nil")
-  expect(4, dropdownStyle, "boolean", "nil")
-
+function contextMenu:new(objects)
   local o = {
-    objects = objects,
-    colors = colors,
-    triggerMethod = triggerMethod,
+    objects = field(objects, "objects", "table"),
+    colors = field(objects, "colors", "table", "nil"),
+    triggerMethod = field(objects, "triggerMethod", "table", "nil"),
     visibleObjects = {},
-    dropdownStyle = dropdownStyle == true,
+    dropdownStyle = field(objects, "dropdownStyle", "boolean", "nil") == true, 
   }
   setmetatable(o, self)
   self.__index = self
@@ -102,6 +99,12 @@ function contextMenu:hide()
   self.visibleObjects = {}
   self.visible = false
   self.selected = nil
+end
+
+--- Removes a context menu
+function contextMenu:remove()
+  self:hide()
+  self.removed = true
 end
 
 return contextMenu

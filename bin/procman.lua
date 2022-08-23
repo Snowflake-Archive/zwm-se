@@ -1,7 +1,14 @@
 local eventManager = require(".lib.events"):new()
 local buttons = require(".lib.ui.button")
 local uiManager = require(".lib.ui.uiManager"):new()
-local mainScrollbox = require(".lib.ui.scrollbox"):new(1, 3, 1, 1, term.current(), {y = true})
+local mainScrollbox = require(".lib.ui.scrollbox"):new{
+  x = 1, 
+  y = 3, 
+  w = 1, 
+  h = 1, 
+  parent = term.current(), 
+  renderScrollbars = {y = true},
+}
 local utils = require(".lib.utils")
 local strings = require("cc.strings")
 local w, h = 0, 0

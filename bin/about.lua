@@ -3,7 +3,15 @@ if not _ENV.wm then error("Missing wm environment") end
 _ENV.wm.setProcessTitle(_ENV.wm.id, "About zWM SE")
 
 local button = require(".lib.ui.button")
-local scrollbox = require(".lib.ui.scrollbox"):new(2, 2, 1, 1, term.current(), {y = true})
+local scrollbox = require(".lib.ui.scrollbox"):new{
+  x = 2, 
+  y = 2, 
+  w = 1, 
+  h = 1, 
+  parent = term.current(), 
+  renderScrollbars = {y = true},
+}
+
 local focusManager = require(".lib.ui.focusableEventManager"):new()
 local eventManager = require(".lib.events"):new()
 local RegistryReader = require(".lib.registry.Reader")

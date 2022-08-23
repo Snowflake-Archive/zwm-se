@@ -13,7 +13,7 @@ function menubar:new(options)
 
   for i, v in ipairs(options) do
     menus[i] = {
-      menu = contextMenuManager:new(v.objects, nil, nil, true),
+      menu = contextMenuManager:new({objects = v.objects, dropdownStyle = true}),
       text = v.text,
     }
   end

@@ -2,9 +2,11 @@
 -- @module[kind=ui] Scrollbox
 
 local scrollbox = {}
-local expect = require("cc.expect").expect
+local ccexpect = require("cc.expect")
+local expect, field = ccexpect.expect, ccexpect.field
 
---- Creates a scrollbox frame.
+--- Creates a scrollbox frame via a dictionary.
+-- The below parameters are in no particular order.
 -- @tparam number x The X position of the scrollbox frame.
 -- @tparam number y The Y position of the scrollbox frame.
 -- @tparam number w The width of the scrollbox frame.
@@ -13,31 +15,33 @@ local expect = require("cc.expect").expect
 -- @tparam[opt] table renderScrollbars A table containing an X and Y paramater, if either is true, a scrollbar will be rendered for that axis.
 -- @tparam[opt] boolean visible If false, the scrollbox will not be rendered. 
 -- @return Scrollbox The created scrollbox instance.
-function scrollbox:new(x, y, w, h, parent, renderScrollbars, visible)
-  expect(1, x, "number")
-  expect(2, y, "number")
-  expect(3, w, "number")
-  expect(4, h, "number")
-  expect(5, parent, "table")
-  expect(6, renderScrollbars, "table", "nil")
-  expect(7, visible, "boolean", "nil")
-
-  local newW, newH = w, h
+function scrollbox:new(options)
+  local w, h = field(options, "w", "number"), field(options, "h", "number")
+  local renderScrollbars = field(options, "renderScrollbars", "table", "nil")
+  local parent = field(options, "parent", "table")
 
   if renderScrollbars then
     if renderScrollbars.x then
-      newH = h - 1
+      h = h - 1
     end
+
     if renderScrollbars.y then
-      newW = w - 1
+      w = w - 1
     end
   end
 
-  local scrollWin = window.create(parent, x, y, newW, newH, visible ~= false)
+  local scrollWin = window.create(
+    field(options, "parent", "table"), 
+    field(options, "x", "number"),
+    field(options, "y", "number"),
+    w, 
+    h, 
+    field(options, "visible", "boolean", "nil") ~= false
+  )
 
   local o = {
-    x = x,
-    y = y,
+    x = field(options, "x", "number"),
+    y = field(options, "y", "number"),
     w = w,
     h = h,
     scrollWin = scrollWin,
@@ -48,7 +52,7 @@ function scrollbox:new(x, y, w, h, parent, renderScrollbars, visible)
     doRenderScrollbars = renderScrollbars,
     parent = parent,
     lines = {},
-    visible = visible ~= false,
+    visible = field(options, "visible", "boolean", "nil") ~= false,
   }
 
   setmetatable(o, self)

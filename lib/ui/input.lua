@@ -4,46 +4,41 @@
 local drawing = require(".lib.utils.draw")
 local strings = require("cc.strings")
 local reigstryReader = require(".lib.registry.Reader")
-local expect = require("cc.expect").expect
+local ccexpect = require("cc.expect")
+local expect, field = ccexpect.expect, ccexpect.field
 
 local reader = reigstryReader:new("user")
 local input = {}
 
---- Creates a new input object.
+--- Creates a new input object via a dictionary.
+-- The below parameters are in no particular order,
 -- @tparam number x The X position of the input.
 -- @tparam number y The Y position of the input.
 -- @tparam number w The width of the input.
--- @tparam function onChange Fires when the content of the input changes.
--- @tparam function onComplete Fires when the input is defocused. This will fire with a method to defocusization, either "return" or "defocus"
+-- @tparam[opt] function onChange Fires when the content of the input changes.
+-- @tparam[opt] function onComplete Fires when the input is defocused. This will fire with a method to defocusization, either "return" or "defocus"
 -- @tparam[opt] string placeholder Text that will be rendered if the input is empty.
 -- @tparam[opt] boolean disabled Whether or not the input can be focused
 -- @tparam[opt] string default The default content of the input
 -- @tparam[opt] boolean visible Whether or not the input is visible. Default is true, if this is false the input won't render, nor will it be visible. 
 -- @return Input The net input.
-function input:new(x, y, w, onChange, onComplete, placeholder, disabled, default, visible)
-  expect(1, x, "number")
-  expect(2, y, "number")
-  expect(3, w, "number")
-  expect(4, onChange, "function")
-  expect(5, onComplete, "function")
-  expect(6, placeholder, "string", "nil")
-  expect(7, disabled, "boolean", "nil")
-  expect(8, default, "string", "nil")
-  expect(9, visible, "boolean", "nil")
+function input:new(options)
+  local default = field(options, "default", "string", "nil") or ""
 
   local o = {
-    x = x,
-    y = y,
-    w = w,
-    content = default or "",
-    onChange = onChange,
-    onComplete = onComplete,
-    placeholder = placeholder or "",
-    cursor = default and #default or 0,
+    x = field(options, "x", "number"),
+    y = field(options, "y", "number"),
+    w = field(options, "w", "number"),
+    content = default,
+    onChange = field(options, "onChange", "function", "nil") or function() end,
+    onComplete = field(options, "onComplete", "function", "nil") or function() end,
+    placeholder = field(options, "placeholder", "string", "nil") or "",
+    cursor = #default,
     displayStartAt = 0,
-    disabled = disabled == true,
+    disabled = field(options, "disabled", "boolean", "nil") == true,
+    visible = field(options, "visible", "boolean", "nil") or true,
     isFocused = false,
-    visible = visible or true,
+    type = "input",
   }
 
   setmetatable(o, self)
@@ -209,6 +204,12 @@ function input:fire(e)
       self:render()
     end
   end
+end
+
+--- Removes an input
+function input:remove()
+  self.removed = true
+  self.visible = false
 end
 
 return input

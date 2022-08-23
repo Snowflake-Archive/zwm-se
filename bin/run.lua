@@ -31,20 +31,26 @@ local cancel = button:new{
   end,
 }
 
-local path = input:new(2, 4, w - 4, function(content) 
-  if #content == 0 then
-    okay:setDisabled(true)
-  else
-    okay:setDisabled(false)
-  end
-  path = content
-end, function(content, type)
-  path = content
-  if type == "return" then
-    _ENV.wm.addProcess(content, { isCentered = true }, true)
-    _ENV.wm.killProcess(_ENV.wm.id)
-  end
-end)
+local path = input:new{
+  x = 2, 
+  y = 4, 
+  w = w - 4, 
+  onChange = function(content) 
+    if #content == 0 then
+      okay:setDisabled(true)
+    else
+      okay:setDisabled(false)
+    end
+    path = content
+  end, 
+  onComplete = function(content, type)
+    path = content
+    if type == "return" then
+      _ENV.wm.addProcess(content, { isCentered = true }, true)
+      _ENV.wm.killProcess(_ENV.wm.id)
+    end
+  end,
+}
 
 path:setFocused(true)
 

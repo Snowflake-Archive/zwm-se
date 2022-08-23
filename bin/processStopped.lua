@@ -9,7 +9,15 @@ if _ENV.wmProcessStopInfo then
   local w, h = term.getSize()
 
   local current = term.current()
-  local errorInfoBox = scrollbox:new(2, 2, w - 2, h - 4, current, {y = true})
+  local errorInfoBox = scrollbox:new{
+    x = 2, 
+    y = 2, 
+    w = w - 2, 
+    h = h - 4, 
+    parent = current, 
+    renderScrollbars = {y = true},
+  }
+
   local okay = button:new{
     x = w - 5, 
     y = h - 1, 
