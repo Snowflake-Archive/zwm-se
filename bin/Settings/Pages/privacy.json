@@ -1,0 +1,40 @@
+{
+  "type": "control",
+  "title": "Privacy & Logging",
+  "previous": "index.json",
+  "options": [
+    {
+      "title": "Logs Persist",
+      "description": "Enables logs persisting after reboot",
+      "action": {
+        "type": "toggle",
+        "reigstry": ""
+      }
+    },
+    {
+      "title": "Enable Debug Logs",
+      "description": "Saves extra-detailed logs for debugging",
+      "action": {
+        "type": "toggle",
+        "reigstry": ""
+      }
+    },
+    {
+      "title": "Share Crash Reports",
+      "description": "Upload crash logs for debugging",
+      "action": {
+        "type": "toggle",
+        "reigstry": ""
+      }
+    },
+    {
+      "title": "Clear Crash Reports",
+      "description": "Clears all crash reports on the system",
+      "action": {
+        "type": "settingsFunction",
+        "function": "clearCrashReports",
+        "text": "Clear"
+      }
+    }
+  ]
+}

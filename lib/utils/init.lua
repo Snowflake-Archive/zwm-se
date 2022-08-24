@@ -94,12 +94,8 @@ end
 -- @return table The cloned table
 function utils.tableClone(tbl)
   expect(1, tbl, "table")
-  local new = {}
-  for k, v in pairs(tbl) do
-    new[k] = v
-  end
   
-  return new
+  return {table.unpack(tbl)}
 end
 
 return utils

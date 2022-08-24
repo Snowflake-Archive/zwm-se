@@ -77,7 +77,7 @@ end
 function button:setVisible(visible)
   expect(1, visible, "boolean")
 
-  self.visible = visible == true
+  self.visible = visible ~= false
   self:render(true)
 end
 
@@ -93,6 +93,14 @@ function button:setFocused(focused)
     self.isFocused = focused == true
     self:render(true)
   end
+end
+
+--- Sets the callback of the button
+-- @tparam function The button callback
+function button:setCallback(callback)
+  expect(1, callback, "function")
+
+  self.callback = callback
 end
 
 --- Renders the button.

@@ -4,7 +4,6 @@ local utils = require(".lib.utils")
 local RegistryReader = require(".lib.Registry.Reader")
 
 local expect = require("cc.expect").expect
-local makePackage = dofile("rom/modules/main/cc/require.lua").make
 
 local log = logger:new(false)
 local native = term.current()
@@ -128,6 +127,7 @@ xpcall(function()
     newProcess.started = os.epoch("utc")
 
     if options.isService ~= true then
+      os.queueEvent("redraw")
       nextRedraw = true
 
       if options.isCentered then
@@ -187,24 +187,29 @@ xpcall(function()
           local data = f.readAll()
           f.close()
 
-          local f = load(data, "in " .. (newProcess.title or process))
+          local f = load(data, "in " .. (newProcess.title or process), nil)
 
           if f then
-            local env = _ENV
-            env.shell = shell
-            env.require, env.package = makePackage(env, "/")
-            env.wm = wm
-            env.wm.id = nextProcessId - 1
+            local env = {}
 
             if options.env then
               for i, v in pairs(options.env) do
-                if not env[i] then
-                  env[i] = v
-                end
+                env[i] = v
               end
             end
 
-            setfenv(f, env)
+            setfenv(
+              f, 
+              setmetatable({
+                shell = shell,
+                wm = {
+                  id = nextProcessId - 1,
+                  unpack(wm),
+                },
+                _G = _G,
+              }, {__index = _ENV})
+            )
+
             f()
             endedGracefully = true
           end
@@ -236,7 +241,7 @@ xpcall(function()
             isCentered = true,
             w = 30,
             h = 14,
-            title = "Crash Report",
+            title = "Crash Report ",
           }, true)
         end
       end)
@@ -267,6 +272,8 @@ xpcall(function()
         infoText = "Window manager modules reloaded successfully!",
       },
     }, true)
+
+    os.queueEvent("redraw")
     nextRedraw = true     
 
     logger:info("Reloaded wm modules")
@@ -282,6 +289,8 @@ xpcall(function()
     if processes[id].minimized ~= minimized then
       wm.setFocus(id, false)
       processes[id].minimized = minimized
+
+      os.queueEvent("redraw")
       nextRedraw = true
 
       redirect(processes[id], "wm_minimized_changed", processes[id].minimized)
@@ -329,6 +338,7 @@ xpcall(function()
 
     redirect(p, "wm_maxamized_changed", p.maxamized)
 
+    os.queueEvent("redraw")
     nextRedraw = true
   end
 
@@ -349,6 +359,8 @@ xpcall(function()
 
       wm.setProcessMinimized(id, false)
       processes[id].focused = true
+
+      os.queueEvent("redraw")
       nextRedraw = true
 
       redirect(processes[id], "wm_focus_gained")
@@ -356,6 +368,8 @@ xpcall(function()
       if processes[id].focused == true then
         redirect(processes[id], "wm_focus_lost")
         processes[id].focused = false
+
+        os.queueEvent("redraw")
         nextRedraw = true
       end
     end
@@ -366,6 +380,8 @@ xpcall(function()
     expect(1, id, "number")
     expect(2, title, "string")
     processes[id].title = title
+
+    os.queueEvent("redraw")
     nextRedraw = true
   end
 

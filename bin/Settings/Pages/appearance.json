@@ -1,0 +1,15 @@
+{
+  "type": "control",
+  "title": "Appearance",
+  "previous": "index.json",
+  "options": [
+    {
+      "title": "Themes",
+      "description": "Select from themes to change colors",
+      "action": {
+        "type": "module",
+        "path": "themes"
+      }
+    }
+  ]
+}

@@ -88,6 +88,7 @@ local function render()
   term.setTextColor(colors.blue)
   term.write("Learn More")
   learnMore.maxX = term.getCursorPos()
+  term.setTextColor(colors.gray)
 
   term.redirect(o)
 

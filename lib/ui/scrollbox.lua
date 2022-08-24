@@ -5,6 +5,8 @@ local scrollbox = {}
 local ccexpect = require("cc.expect")
 local expect, field = ccexpect.expect, ccexpect.field
 
+local debugger = peripheral.find("debugger")
+
 --- Creates a scrollbox frame via a dictionary.
 -- The below parameters are in no particular order.
 -- @tparam number x The X position of the scrollbox frame.
@@ -72,7 +74,7 @@ function scrollbox:new(options)
       
       local lineMin = o.y + 1
       local lineMax = o.y + o.h - 2
-      local progress = (-o.scrollY + 2) / (o.maxHeight - o.h)
+      local progress = math.min(math.max(0, (-o.scrollY + 1) / (o.maxHeight - o.h)), 1)
       local lineHeight = lineMax - lineMin
       local line = lineMin + math.floor(progress * lineHeight)
 
@@ -224,6 +226,12 @@ function scrollbox:setVisible(value)
   self.visible = value
 end
 
+--- Resets the scrollbox's scroll.
+function scrollbox:resetScroll()
+  self.scrollX = 1
+  self.scrollY = 1
+end
+
 --- Repositions the scrollbox.
 -- @tparam number x The X position of the scrollbox.
 -- @tparam number y The Y position of the scrollbox.
@@ -291,7 +299,7 @@ function scrollbox:addToEventManager(eventManager)
     local min = self.y + 1
     local max = self.y + self.h - 2
     local progress = newY / (max - min)
-    local scroll = progress * self.maxHeight
+    local scroll = progress * (self.maxHeight - self.h)
     self.scrollY = -math.max(math.min(math.floor(scroll - 1), self.maxHeight - 2), -1)
     self:redraw()
   end

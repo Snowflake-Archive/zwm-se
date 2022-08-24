@@ -1,0 +1,78 @@
+{
+  "type": "control",
+  "title": "Home",
+  "options": [
+    {
+      "title": "Appearance",
+      "description": "Customize the look & feel of zwm",
+      "action": {
+        "type": "openPage",
+        "page": "appearance.json"
+      }
+    },
+    {
+      "title": "Application Settings",
+      "description": "NYI",
+      "action": {
+        "type": "openPage",
+        "page": "applications.json"
+      }
+    },
+    {
+      "title": "Devices",
+      "description": "NYI",
+      "action": {
+        "type": "openPage",
+        "page": "devices.json"
+      }
+    },
+    {
+      "title": "Menu & Menubar",
+      "description": "(NYI) Change timezone, customize pinned apps, etc",
+      "action": {
+        "type": "openPage",
+        "page": "menu.json"
+      }
+    },
+    {
+      "title": "Packages",
+      "description": "NYI",
+      "action": {
+        "type": "openPage",
+        "page": "packages.json"
+      }
+    },
+    {
+      "title": "Privacy & Logging",
+      "description": "Logging and such (WIP)",
+      "action": {
+        "type": "openPage",
+        "page": "privacy.json"
+      }
+    },
+    {
+      "title": "Security",
+      "description": "NYI",
+      "action": {
+        "type": "openPage",
+        "page": "security.json"
+      }
+    },
+    {
+      "title": "Update",
+      "description": "NYI",
+      "action": {
+        "type": "openPage",
+        "page": "update.json"
+      }
+    },
+    {
+      "title": "About",
+      "description": "NYI",
+      "action": {
+        "type": "openPage",
+        "page": "about.json"
+      }
+    }
+  ]
+}
