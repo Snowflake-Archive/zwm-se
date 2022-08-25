@@ -15,8 +15,9 @@ local function fireButtonEvents(_, o, e)
         local x, y = oX, oY
         if v.scrollbox then
           local sX, sY = v.scrollbox:getScroll()
-          x = x - sX
-          y = y - sY
+          local sbX, sbY = v.scrollbox.x, v.scrollbox.y
+          x = x - sX + sbX
+          y = y - sY + sbY
         end
 
         if v.disabled == false and v.visible == true then

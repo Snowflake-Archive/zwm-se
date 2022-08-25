@@ -16,6 +16,7 @@ local debugger = peripheral.find("debugger")
 -- @tparam table parent The parent term of the scrollbox window.
 -- @tparam[opt] table renderScrollbars A table containing an X and Y paramater, if either is true, a scrollbar will be rendered for that axis.
 -- @tparam[opt] boolean visible If false, the scrollbox will not be rendered. 
+-- @tparam[opt] number defaultColor The default background color. 
 -- @return Scrollbox The created scrollbox instance.
 function scrollbox:new(options)
   local w, h = field(options, "w", "number"), field(options, "h", "number")
@@ -55,6 +56,7 @@ function scrollbox:new(options)
     parent = parent,
     lines = {},
     visible = field(options, "visible", "boolean", "nil") ~= false,
+    defaultColor = options.defaultColor,
   }
 
   setmetatable(o, self)
@@ -87,6 +89,7 @@ function scrollbox:new(options)
     if o.visible then
       local oldX, oldY = scrollWin.getCursorPos()
       local _, sY = o.scrollX, o.scrollY
+      scrollWin.setBackgroundColor(o.defaultColor or scrollWin.getBackgroundColor())
       scrollWin.clear()
       for i, v in pairs(o.lines) do
         scrollWin.setCursorPos(1, i + sY - 1)
@@ -102,9 +105,11 @@ function scrollbox:new(options)
     expect(2, foreground, "string")
     expect(3, background, "string")
 
-    local fg = colors.toBlit(term.getTextColor())
-    local bg = colors.toBlit(term.getBackgroundColor())
+    local fg = colors.toBlit(scrollWin.getTextColor())
+    local bg = colors.toBlit(o.defaultColor or scrollWin.getBackgroundColor())
     local sp = " "
+
+    debugger.print(bg)
 
     local cx, cy = scrollWin.getCursorPos()
     o.maxWidth = math.max(o.maxWidth, cx + #text)

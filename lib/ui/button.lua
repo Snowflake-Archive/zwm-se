@@ -18,6 +18,7 @@ local button = {}
 -- @tparam[opt] boolean visible If this is false, the button will not be rendered, nor selectable.
 -- @tparam[opt] boolean disablePadding If this is true, the text of the button will be its actual text, and not padded.
 -- @tparam[opt] table colors A table for colors, background, clicking, focused, text, and textDisabled 
+-- @tparam[opt] table term The terminal to render the button in
 -- @return Button The new button.
 function button:new(options)
   expect(1, options, "table")
@@ -35,6 +36,7 @@ function button:new(options)
     colors = field(options, "colors", "table", "nil") or {},
     reader = reigstryReader:new("user"),
     type = "button",
+    term = options.term,
   }
 
   setmetatable(o, self)
@@ -109,6 +111,10 @@ function button:render(useBgRender)
   expect(1, useBgRender, "boolean", "nil")
 
   if self.visible == true then
+    local oT = term.current()
+
+    if self.term then term.redirect(self.term) end
+
     local oX, oY = term.getCursorPos()
 
     local displayStr = self.text
@@ -146,6 +152,8 @@ function button:render(useBgRender)
 
     term.setBackgroundColor(self.bgOnRender)
     term.setCursorPos(oX, oY)
+
+    term.redirect(oT)
   end
 end
 

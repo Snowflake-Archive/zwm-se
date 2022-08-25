@@ -12,16 +12,21 @@ local mainScrollbox = require(".lib.ui.scrollbox"):new{
   h = h - 3,
   parent = term.current(),
   renderScrollbars = { y = true },
+  defaultColor = colors.white,
 }
+
+local generalFunctions = require(".bin.Settings.generalSettingsFunctions")
 
 local cachedPages = {
   ["index.json"] = fileUtils.readJSON("/bin/Settings/Pages/index.json"),
 }
 
+local existingButtons = {}
+
 local currentPage = cachedPages["index.json"]
 local backButton = buttons:new{ x = 3, y = 2, text = "\27", callback = function() end, visible = false, }
 
-local function drawNavigationOption(text, description, y, t, renderArrow)
+local function drawNavigationOption(text, description, y, t, renderArrow, i)
   t.setTextColor(colors.black)
   t.setCursorPos(2, y)
   t.write(text)
@@ -38,6 +43,29 @@ local function drawNavigationOption(text, description, y, t, renderArrow)
   t.setTextColor(colors.gray)
   t.setCursorPos(2, y + 2)
   t.write(" ")
+
+  if i and existingButtons[i] then
+    existingButtons[i]:reposition(w - #existingButtons[i].text - 3, y)
+    existingButtons[i]:render()
+  end
+end
+
+local function setupPage(data)
+  for _, v in pairs(existingButtons) do
+    v:remove()
+  end
+
+  existingButtons = {}
+
+  if data.type == "control" then
+    for i, v in pairs(data.options) do
+      if v.action.type == "settingsFunction" then
+        local button = buttons:new{ x = 3, y = 3, text = v.action.text, callback = generalFunctions[v.action["function"]], term = mainScrollbox:getTerminal() }
+        uiManager:addButton(button, mainScrollbox)
+        existingButtons[i] = button
+      end
+    end
+  end
 end
 
 local function render(isLoading)
@@ -78,7 +106,8 @@ local function render(isLoading)
 
   if currentPage.type == "control" then
     for i, v in pairs(currentPage.options) do
-      drawNavigationOption(v.title, v.description, (i - 1) * 3 + 1, box, v.action.type == "openPage")
+      drawNavigationOption(v.title, v.description, (i - 1) * 3 + 1, box, v.action.type == "openPage", i)
+      term.setBackgroundColor(colors.white)
     end
   end
   
@@ -98,6 +127,7 @@ local function navigate(page)
 
   currentPage = cachedPages[page]
 
+  setupPage(cachedPages[page])
   render()
 end
 
